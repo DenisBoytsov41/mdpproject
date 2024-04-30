@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="x-ua-compatible" content="ie=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="0" />
+		<meta charset="utf-8" />
+		<meta name="Description" content="Электронное расписание занятий Костромского государственного университета"/>
+		<meta name="msapplication-TileImage" content="img/ksu-tile-small.png">
+		<meta name="msapplication-square70x70logo" content="img/ksu-tile-small.png" />
+		<meta name="msapplication-square150x150logo" content="img/ksu-tile-medium.png" />
+		<meta name="msapplication-wide310x150logo" content="img/ksu-tile-wide.png" />
+		<meta name="msapplication-square310x310logo" content="img/ksu-tile-large.png" />
+		<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+		<title>КГУ - расписание занятий</title>
+		<script type="application/javascript" src="js/jquery.min.js"></script>
+		<script type="application/javascript" src="js/uikit.min.js"></script>
+		<script type="application/javascript" src="js/uikit-icons.min.js"></script>
+		<script type="application/javascript" src="js/html2canvas.min.js"></script>
+		<script type="application/javascript" src="js/timetable.js"></script>
+		<link href="css/uikit.min.css" rel="stylesheet" type="text/css" />
+		<link href="css/desktop.css" rel="stylesheet" type="text/css" />
+		<link href="css/mobile.css" rel="stylesheet" type="text/css" />
+		<link rel="icon" type="image/x-icon" href="img/favicon.ico" />
+	</head>
+	<body>
+		<div class="header">
+			<div>
+				<div class="logo">
+					<a href="https://ksu.edu.ru" target="_blank"><img src="img/logo.png" alt="КГУ" /></a>
+				</div>
+				<div class="title">
+					<h1>Расписание занятий</h1>
+					<h2>Все формы обучения</h2>
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<form>
+				<fieldset class="uk-fieldset">
+					<div class="uk-margin">
+						<select id="semester" class="uk-select"></select>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<ul class="uk-flex-center forms" uk-tab>
+			<li><a href="#"><span uk-icon="icon: users"></span> расписание студента</a></li>
+			<li><a href="#"><span uk-icon="icon: user"></span> расписание преподавателя</a></li>
+			<li><a href="#"><span uk-icon="icon: home"></span> аудиторный фонд</a></li>
+		</ul>
+		<ul class="uk-switcher uk-margin">
+			<li>
+				<div class="container" role="complementary">
+					<form>
+						<fieldset class="uk-fieldset">
+							<div class="uk-margin">
+								<select id="institute" class="uk-select all" disabled></select>
+							</div>
+							<div class="uk-margin">
+								<select id="speciality" class="uk-select all semester institute teacher building classroom" disabled></select>
+							</div>
+							<div class="uk-margin">
+								<select id="group" class="uk-select all semester institute speciality teacher building classroom" disabled></select>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</li>
+			<li>
+				<div class="container">
+					<form>
+						<fieldset class="uk-fieldset">
+							<div class="uk-margin">
+								<select id="teacher" class="uk-select all" disabled></select>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</li>
+			<li>
+				<div class="container">
+					<form>
+						<fieldset class="uk-fieldset">
+							<div class="uk-margin">
+								<select id="building" class="uk-select all" disabled></select>
+							</div>
+							<div class="uk-margin">
+								<select id="classroom" class="uk-select all semester institute speciality group teacher building" disabled></select>
+							</div>
+						</fieldset>
+					</form>
+				</div>
+			</li>
+		</ul>
+		<div id="timetable-o" class="timetable hidden-area">
+			<p id="flat"><span id="print" uk-icon="icon: print"></span></p>
+			<ul class="uk-subnav uk-subnav-pill" uk-switcher>
+				<li><a href="#">Над чертой</a></li>
+				<li><a href="#">Под чертой</a></li>
+			</ul>
+			<label><input id="hide_empty" class="uk-checkbox" type="checkbox"> Скрывать "пустые" пары</label>
+			<p><a class="uk-link" href="#help" uk-toggle>Порядок чередования недель</a></p>
+			<ul id="printarea" class="uk-switcher uk-margin">
+				<li>
+					<div>
+						<div class="uk-grid-match uk-grid-column-small uk-grid-row-small uk-child-width-1-6@s uk-text-center" uk-grid>
+							<div class="item item111 order01">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_first'>
+										<div><a class="uk-link" href="#tt-modal-11" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-11" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-111" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+									</a>
+								</div>
+							</div>
+							<div class="item item121 order08">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_first'>
+										<div><a class="uk-link" href="#tt-modal-21" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-21" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-121" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item131 order15">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_first'>
+										<div><a class="uk-link" href="#tt-modal-31" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-31" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-131" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item141 order22">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_first'>
+										<div><a class="uk-link" href="#tt-modal-41" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-41" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-141" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item151 order29">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_first'>
+										<div><a class="uk-link" href="#tt-modal-51" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-51" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-151" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item161 order36">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_first'>
+										<div><a class="uk-link" href="#tt-modal-61" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-161" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item112 order02">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_second'>
+										<div><a class="uk-link" href="#tt-modal-12" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-12" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-112" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item122 order09">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_second'>
+										<div><a class="uk-link" href="#tt-modal-22" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-22" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-122" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item132 order16">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_second'>
+										<div><a class="uk-link" href="#tt-modal-32" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-32" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-132" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item142 order23">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_second'>
+										<div><a class="uk-link" href="#tt-modal-42" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-42" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-142" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item152 order30">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_second'>
+										<div><a class="uk-link" href="#tt-modal-52" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-52" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-152" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item162 order37">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_second'>
+										<div><a class="uk-link" href="#tt-modal-62" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-62" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-162" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item113 order03">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_third'>
+										<div><a class="uk-link" href="#tt-modal-13" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-13" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-113" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item123 order10">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_third'>
+										<div><a class="uk-link" href="#tt-modal-23" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-23" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-123" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item133 order17">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_third'>
+										<div><a class="uk-link" href="#tt-modal-33" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-33" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-133" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item143 order24">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_third'>
+										<div><a class="uk-link" href="#tt-modal-43" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-43" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-143" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item153 order31">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_third'>
+										<div><a class="uk-link" href="#tt-modal-53" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-53" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-153" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item163 order38">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_third'>
+										<div><a class="uk-link" href="#tt-modal-63" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-63" uk-toggle> 11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-163" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item114 order04">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-14" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-14" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-114" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item124 order11">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-24" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-24" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-124" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item134 order18">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-34" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-34" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-134" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item144 order25">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-44" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-44" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-144" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item154 order32">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-54" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-54" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-154" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item164 order39">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-64" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-64" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-164" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item115 order05">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-15" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-15" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-115" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item125 order12">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-25" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-25" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-125" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item135 order19">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-35" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-35" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-135" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item145 order26">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-45" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-45" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-145" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item155 order33">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-55" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-55" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-155" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item165 order40">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-65" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-65" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-165" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item116 order06">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-16" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-16" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-116" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item126 order13">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-26" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-26" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-126" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item136 order20">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-36" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-36" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-136" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item146 order27">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-46" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-46" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-146" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item156 order34">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-56" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-56" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-156" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item166 order41">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-66" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-66" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-166" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item117 order07">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-17" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-17" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-117" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item127 order14">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-27" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-27" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-127" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item137 order21">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-37" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-37" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-137" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item147 order28">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-47" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-47" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-147" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item157 order35">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-57" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-57" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-157" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item167 order42">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-67" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-67" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-167" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="divider order43">
+								<span>понедельник</span>
+							</div>
+							<div class="divider order44">
+								<span>вторник</span>
+							</div>
+							<div class="divider order45">
+								<span>среда</span>
+							</div>
+							<div class="divider order46">
+								<span>четверг</span>
+							</div>
+							<div class="divider order47">
+								<span>пятница</span>
+							</div>
+							<div class="divider order48">
+								<span>суббота</span>
+							</div>
+						</div>								
+					</div>
+				</li>
+				<li>
+					<div>
+						<div class="uk-grid-match uk-grid-column-small uk-grid-row-small uk-child-width-1-6@s uk-text-center" uk-grid>
+							<div class="item item211 order01">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_first'>
+										<div><a class="uk-link" href="#tt-modal-11" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-11" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-211" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+									</a>
+								</div>
+							</div>
+							<div class="item item221 order08">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_first'>
+										<div><a class="uk-link" href="#tt-modal-21" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-21" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-221" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item231 order15">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_first'>
+										<div><a class="uk-link" href="#tt-modal-31" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-31" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-231" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item241 order22">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_first'>
+										<div><a class="uk-link" href="#tt-modal-41" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-41" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-241" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item251 order29">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_first'>
+										<div><a class="uk-link" href="#tt-modal-51" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-51" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-251" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item261 order36">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_first'>
+										<div><a class="uk-link" href="#tt-modal-61" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-" uk-toggle>08:30-10:00</a></div>
+									</div>
+									<div id="tt-o-261" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item212 order02">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_second'>
+										<div><a class="uk-link" href="#tt-modal-12" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-12" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-212" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item222 order09">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_second'>
+										<div><a class="uk-link" href="#tt-modal-22" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-22" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-222" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item232 order16">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_second'>
+										<div><a class="uk-link" href="#tt-modal-32" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-32" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-232" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item242 order23">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_second'>
+										<div><a class="uk-link" href="#tt-modal-42" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-42" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-242" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item252 order30">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_second'>
+										<div><a class="uk-link" href="#tt-modal-52" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-52" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-252" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item262 order37">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_second'>
+										<div><a class="uk-link" href="#tt-modal-62" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-62" uk-toggle>10:10-11:40</a></div>
+									</div>
+									<div id="tt-o-262" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item213 order03">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_third'>
+										<div><a class="uk-link" href="#tt-modal-13" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-13" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-213" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item223 order10">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_third'>
+										<div><a class="uk-link" href="#tt-modal-23" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-23" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-223" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item233 order17">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_third'>
+										<div><a class="uk-link" href="#tt-modal-33" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-33" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-233" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item243 order24">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_third'>
+										<div><a class="uk-link" href="#tt-modal-43" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-43" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-243" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item253 order31">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_third'>
+										<div><a class="uk-link" href="#tt-modal-53" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-53" uk-toggle>11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-253" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item263 order38">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_third'>
+										<div><a class="uk-link" href="#tt-modal-63" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-63" uk-toggle> 11:50-13:20</a></div>
+									</div>
+									<div id="tt-o-263" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item214 order04">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-14" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-14" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-214" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item224 order11">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-24" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-24" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-224" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item234 order18">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-34" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-34" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-234" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item244 order25">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-44" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-44" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-244" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item254 order32">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-54" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-54" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-254" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item264 order39">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_fourth'>
+										<div><a class="uk-link" href="#tt-modal-64" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-64" uk-toggle>14:00-15:30</a></div>
+									</div>
+									<div id="tt-o-264" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item215 order05">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-15" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-15" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-215" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item225 order12">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-25" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-25" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-225" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item235 order19">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-35" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-35" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-235" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item245 order26">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-45" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-45" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-245" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item255 order33">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-55" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-55" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-255" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item265 order40">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_fifth'>
+										<div><a class="uk-link" href="#tt-modal-65" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-65" uk-toggle>15:40-17:10</a></div>
+									</div>
+									<div id="tt-o-265" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item216 order06">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-16" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-16" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-216" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item226 order13">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-26" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-26" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-226" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item236 order20">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-36" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-36" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-236" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item246 order27">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-46" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-46" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-246" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item256 order34">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-56" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-56" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-256" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item266 order41">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_sixth'>
+										<div><a class="uk-link" href="#tt-modal-66" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-66" uk-toggle>17:20-18:50</a></div>
+									</div>
+									<div id="tt-o-266" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item217 order07">
+								<div class="uk-card uk-card-default uk-card-body data_mon">
+									<div class='info info_mon info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-17" uk-toggle>ПН</a></div>
+										<div><a class="uk-link" href="#tt-modal-17" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-217" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item227 order14">
+								<div class="uk-card uk-card-default uk-card-body data_tue">
+									<div class='info info_tue info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-27" uk-toggle>ВТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-27" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-227" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item237 order21">
+								<div class="uk-card uk-card-default uk-card-body data_wen">
+									<div class='info info_wen info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-37" uk-toggle>СР</a></div>
+										<div><a class="uk-link" href="#tt-modal-37" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-237" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item247 order28">
+								<div class="uk-card uk-card-default uk-card-body data_thu">
+									<div class='info info_thu info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-47" uk-toggle>ЧТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-47" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-247" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item257 order35">
+								<div class="uk-card uk-card-default uk-card-body data_fri">
+									<div class='info info_fri info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-57" uk-toggle>ПТ</a></div>
+										<div><a class="uk-link" href="#tt-modal-57" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-257" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="item item267 order42">
+								<div class="uk-card uk-card-default uk-card-body data_sat">
+									<div class='info info_sat info_seventh'>
+										<div><a class="uk-link" href="#tt-modal-67" uk-toggle>СБ</a></div>
+										<div><a class="uk-link" href="#tt-modal-67" uk-toggle>19:00-20:30</a></div>
+									</div>
+									<div id="tt-o-267" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></div>
+								</div>
+							</div>
+							<div class="divider order43">
+								<span>понедельник</span>
+							</div>
+							<div class="divider order44">
+								<span>вторник</span>
+							</div>
+							<div class="divider order45">
+								<span>среда</span>
+							</div>
+							<div class="divider order46">
+								<span>четверг</span>
+							</div>
+							<div class="divider order47">
+								<span>пятница</span>
+							</div>
+							<div class="divider order48">
+								<span>суббота</span>
+							</div>
+						</div>								
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div id="timetable-z" class="timetable">
+			<table id="tt-z" class="uk-table uk-table-small uk-table-divider">
+				<tr>
+					<th id="pckr-z"></th>
+					<th id="date-z"></th>
+					<th id="time-z"></th>
+					<th id="info-z"></th>
+				</tr>
+			</table>
+		</div>
+		<div id="help" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Порядок чередования недель</h3>
+				<table class="uk-table uk-table-striped uk-table-hover">
+					<thead>
+						<tr>
+							<th>НАД ЧЕРТОЙ</th>
+							<th>ПОД ЧЕРТОЙ</th>
+						</tr>
+					</thead>
+					<tbody>
+				<tr><td>15.01.2024 -21.01.2024</td><td>22.01.2024 -28.01.2024</td></tr><tr><td>29.01.2024 -04.02.2024</td><td>05.02.2024 -11.02.2024</td></tr><tr><td>12.02.2024 -18.02.2024</td><td>19.02.2024 -25.02.2024</td></tr><tr><td>26.02.2024 -03.03.2024</td><td>04.03.2024 -10.03.2024</td></tr><tr><td>11.03.2024 -17.03.2024</td><td>18.03.2024 -24.03.2024</td></tr><tr><td>25.03.2024 -31.03.2024</td><td>01.04.2024 -07.04.2024</td></tr><tr><td>08.04.2024 -14.04.2024</td><td>15.04.2024 -21.04.2024</td></tr><tr><td>22.04.2024 -28.04.2024</td><td>29.04.2024 -05.05.2024</td></tr><tr><td>06.05.2024 -12.05.2024</td><td>13.05.2024 -19.05.2024</td></tr><tr><td>20.05.2024 -26.05.2024</td><td>27.05.2024 -02.06.2024</td></tr><tr><td>03.06.2024 -09.06.2024</td><td>10.06.2024 -16.06.2024</td></tr><tr><td>17.06.2024 -23.06.2024</td><td>26.06.2024 -30.06.2024</td></tr><tr><td>01.07.2024 -07.07.2024</td><td>08.07.2024 -14.07.2024</td></tr><tr><td>15.07.2024 -21.07.2024</td><td>22.07.2024 -28.07.2024</td></tr><tr><td>29.07.2024 -04.08.2024</td><td></td></tr>					</tbody>
+				</table>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-11" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-111" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-211" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-21" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-121" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-221" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-31" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-131" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-231" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-41" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-141" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-241" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-51" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-151" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-251" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-61" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 1 пара</h3>
+				<p><sup>08:30 - 10:00 (общее)</sup><br /><sup>09:30 - 11:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-161" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-261" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-12" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-112" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-212" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-22" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-122" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-222" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-32" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-132" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-232" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-42" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-142" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-242" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-52" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-152" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-252" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-62" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 2 пара</h3>
+				<p><sup>10:10 - 11:40 (общее)</sup><br /><sup>11:10 - 12:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-162" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-262" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-13" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-113" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-213" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-23" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-123" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-223" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-33" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-133" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-233" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-43" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-143" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-243" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-53" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-153" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-253" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-63" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 3 пара</h3>
+				<p><sup>11:50 - 13:20 (общее)</sup><br /><sup>12:50 - 14:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-163" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-263" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-14" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-114" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-214" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-24" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-124" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-224" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-34" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-134" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-234" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-44" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-144" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-244" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-54" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-154" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-254" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-64" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 4 пара</h3>
+				<p><sup>14:00 - 15:30 (общее)</sup><br /><sup>14:30 - 16:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-164" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-264" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-15" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-115" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-215" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-25" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-125" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-225" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-35" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-135" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-235" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-45" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-145" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-245" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-55" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-155" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-255" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-65" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 5 пара</h3>
+				<p><sup>15:40 - 17:10 (общее)</sup><br /><sup>16:10 - 17:40 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-165" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-265" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-16" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-116" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-216" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-26" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-126" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-226" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-36" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-136" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-236" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-46" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-146" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-246" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-56" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-156" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-256" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-66" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 6 пара</h3>
+				<p><sup>17:20 - 18:50 (общее)</sup><br /><sup>17:50 - 18:20 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-166" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-266" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-17" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Понедельник, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-117" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-217" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-27" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Вторник, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-127" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-227" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-37" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Среда, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-137" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-237" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-47" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Четверг, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-147" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-247" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-57" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Пятница, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-157" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-257" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+		<div id="tt-modal-67" uk-modal class="uk-modal">
+			<div class="uk-modal-dialog uk-modal-body">
+				<h3>Суббота, 7 пара</h3>
+				<p><sup>19:00 - 20:30 (общее)</sup><br /><sup>18:30 - 20:00 (ИПП)</sup></p>
+				<ul class="uk-flex" uk-tab>
+					<li><a href="#"><span uk-icon="icon: arrow-up"></span> НАД ЧЕРТОЙ</a></li>
+					<li><a href="#"><span uk-icon="icon: arrow-down"></span> ПОД ЧЕРТОЙ</a></li>
+				</ul>
+				<ul class="uk-switcher uk-margin">
+					<li id="tt-m-167" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+					<li id="tt-m-267" class="tt-o-item"><p>[НЕТ ЗАНЯТИЙ]</p></li>
+				</ul>
+				<p class="uk-text-right">
+					<button class="uk-button uk-button-primary uk-modal-close" type="button">Закрыть</button>
+				</p>
+			</div>
+		</div>
+	</body>
+</html>

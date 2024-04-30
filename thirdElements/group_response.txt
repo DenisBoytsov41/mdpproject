@@ -1,0 +1,1 @@
+<option value="">Выберите группу</option><option value="20-ИСбо-2">20-ИСбо-2</option><option value="21-ИСбо-1">21-ИСбо-1</option><option value="21-ИСбо-2">21-ИСбо-2</option><option value="22-ИСбо-2">22-ИСбо-2</option>

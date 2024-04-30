@@ -1,1 +1,0 @@
-<option value="">Выберите группу</option><option value="19-Абз-2">19-Абз-2</option><option value="20-Абз-2">20-Абз-2</option><option value="21-Абз-2">21-Абз-2</option><option value="22-Абз-2">22-Абз-2</option><option value="23-Абз-2">23-Абз-2</option>

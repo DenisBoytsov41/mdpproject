@@ -9,6 +9,18 @@ from bs4 import BeautifulSoup
 from schedule_processing import process_schedule_response
 from utils import NoVerifyHTTPAdapter
 
+def save_request_to_file(data_request, filename):
+    filepath = os.path.join("..", "thirdElements", filename)
+    with open(filepath, "w", encoding="utf-8") as file:
+        file.write(json.dumps(data_request, indent=4))
+    return filepath
+
+def save_response_to_file(response, filename):
+    filepath = os.path.join("..", "thirdElements", filename)
+    with open(filepath, "w", encoding="utf-8") as file:
+        file.write(response.text)
+    return filepath
+
 def select_schedule(driver):
     select_element_semester = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "semester"))
@@ -22,8 +34,6 @@ def select_schedule(driver):
 
     if select_element_semester:
         options_semester = select_element_semester.find_all('option')
-
-        max_semester = len(options_semester)
 
         print("Выберите семестр:")
         for i, option_semester in enumerate(options_semester[1:], start=1):
@@ -39,46 +49,31 @@ def select_schedule(driver):
             5: 1
         }
 
-        selected_semester = -1
+        if selected_semester_index not in semester_id_mapping:
+            print("Недопустимый номер семестра.")
+            exit()
+
+        selected_semester_id = semester_id_mapping[selected_semester_index]
+
         while True:
-
-            if selected_semester_index in semester_id_mapping:
-                selected_semester_id = semester_id_mapping[selected_semester_index]
-                # Запрос типа расписания у пользователя
-                user_input = input(
-                    "Введите 'student' для расписания студента или 'teacher' для расписания преподавателя: ")
-            else:
-                print("Недопустимый номер семестра.")
-                exit()
-
-            selected_semester = selected_semester_id
+            user_input = input("Введите 'student' для расписания студента или 'teacher' для расписания преподавателя: ")
 
             if user_input.lower() == 'student':
                 data_request = {
                     "request": "institute",
-                    "semester": selected_semester
+                    "semester": selected_semester_id
                 }
-                # Сохраняем текст запроса в файл
-                inst_file_path = os.path.join("..", "thirdElements", "institute_request.txt")
-                with open(inst_file_path, "w", encoding="utf-8") as file:
-                    file.write(json.dumps(data_request, indent=4))
+                inst_request_file = save_request_to_file(data_request, "institute_request.txt")
 
                 session_request = requests.Session()
                 session_request.mount('https://', NoVerifyHTTPAdapter())
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
-
-                instres_file_path = os.path.join("..", "thirdElements", "institute_response.txt")
-                with open(instres_file_path, "w", encoding="utf-8") as file:
-                    file.write(response_request.text)
+                inst_response_file = save_response_to_file(response_request, "institute_response.txt")
 
                 if response_request.status_code == 200:
-                    output_file_path = os.path.join("..", "thirdElements", "output.php")
-                    with open(output_file_path, "w", encoding="utf-8") as file:
-                        file.write(response_request.text)
+                    output_file = save_response_to_file(response_request, "output.php")
 
-                    print("Файл успешно получен и сохранен как output.php.")
-
-                    with open(output_file_path, "r", encoding="utf-8") as file:
+                    with open(output_file, "r", encoding="utf-8") as file:
                         content = file.read()
                     options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
 
@@ -95,33 +90,22 @@ def select_schedule(driver):
 
                             data_speciality = {
                                 "request": "speciality",
-                                "semester": selected_semester,
+                                "semester": selected_semester_id,
                                 "institute": selected_institute
                             }
-
-                            speciality_file_path = os.path.join("..", "thirdElements", "speciality_request.txt")
-                            with open(speciality_file_path, "w", encoding="utf-8") as file:
-                                file.write(json.dumps(data_speciality, indent=4))
+                            spec_request_file = save_request_to_file(data_speciality, "speciality_request.txt")
 
                             session_speciality = requests.Session()
                             session_speciality.mount('https://', NoVerifyHTTPAdapter())
                             response_speciality = session_speciality.post("https://timetable.ksu.edu.ru/engine.php",
                                                                           data=data_speciality)
-
-                            specres_file_path = os.path.join("..", "thirdElements", "speciality_response.txt")
-                            with open(specres_file_path, "w", encoding="utf-8") as file:
-                                file.write(response_speciality.text)
+                            spec_response_file = save_response_to_file(response_speciality, "speciality_response.txt")
 
                             if response_speciality.status_code == 200:
-                                output_speciality_file_path = os.path.join("..", "thirdElements", "output_speciality.php")
-                                with open(output_speciality_file_path, "w", encoding="utf-8") as file:
-                                    file.write(response_speciality.text)
+                                output_speciality_file = save_response_to_file(response_speciality, "output_speciality.php")
 
-                                print("Файл успешно получен и сохранен как output_speciality.php.")
-
-                                with open(output_speciality_file_path, "r", encoding="utf-8") as file:
+                                with open(output_speciality_file, "r", encoding="utf-8") as file:
                                     content = file.read()
-
                                 options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
 
                                 if options_output:
@@ -137,35 +121,23 @@ def select_schedule(driver):
 
                                         data_group = {
                                             "request": "group",
-                                            "semester": selected_semester,
+                                            "semester": selected_semester_id,
                                             "institute": selected_institute,
                                             "speciality": selected_speciality
                                         }
-
-                                        group_file_path = os.path.join("..", "thirdElements","group_request.txt")
-                                        with open(group_file_path, "w", encoding="utf-8") as file:
-                                            file.write(json.dumps(data_group, indent=4))
+                                        group_request_file = save_request_to_file(data_group, "group_request.txt")
 
                                         session_group = requests.Session()
                                         session_group.mount('https://', NoVerifyHTTPAdapter())
                                         response_group = session_group.post("https://timetable.ksu.edu.ru/engine.php",
                                                                             data=data_group)
-
-                                        group_response_file_path = os.path.join("..", "thirdElements", "group_response.txt")
-                                        with open(group_response_file_path, "w", encoding="utf-8") as file:
-                                            file.write(response_group.text)
+                                        group_response_file = save_response_to_file(response_group, "group_response.txt")
 
                                         if response_group.status_code == 200:
-                                            output_group_file_path = os.path.join("..", "thirdElements",
-                                                                                    "output_group.php")
-                                            with open(output_group_file_path, "w", encoding="utf-8") as file:
-                                                file.write(response_group.text)
+                                            output_group_file = save_response_to_file(response_group, "output_group.php")
 
-                                            print("Файл успешно получен и сохранен как output_group.php.")
-
-                                            with open(output_group_file_path, "r", encoding="utf-8") as file:
+                                            with open(output_group_file, "r", encoding="utf-8") as file:
                                                 content = file.read()
-
                                             options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>',
                                                                         content)
 
@@ -182,30 +154,20 @@ def select_schedule(driver):
 
                                                     data_schedule = {
                                                         "request": "stimetable",
-                                                        "semester": selected_semester,
+                                                        "semester": selected_semester_id,
                                                         "institute": selected_institute,
                                                         "speciality": selected_speciality,
                                                         "group": selected_group
                                                     }
-
-                                                    schedule_file_path = os.path.join("..", "thirdElements",
-                                                                                          "schedule_request.txt")
-                                                    with open(schedule_file_path, "w",
-                                                              encoding="utf-8") as file:
-                                                        file.write(json.dumps(data_schedule, indent=4))
+                                                    schedule_request_file = save_request_to_file(data_schedule, "schedule_request.txt")
 
                                                     session_schedule = requests.Session()
                                                     session_schedule.mount('https://', NoVerifyHTTPAdapter())
                                                     response_schedule = session_schedule.post(
                                                         "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
+                                                    schedule_response_file = save_response_to_file(response_schedule, "schedule_response.txt")
 
-                                                    schedule_response_file_path = os.path.join("..", "thirdElements",
-                                                                                      "schedule_response.txt")
-                                                    with open(schedule_response_file_path, "w",
-                                                              encoding="utf-8") as file:
-                                                        file.write(response_schedule.text)
-
-                                                    process_schedule_response(response_schedule, selected_semester)
+                                                    process_schedule_response(response_schedule, selected_semester_id)
 
                                                 else:
                                                     print("Недопустимый номер группы.")
@@ -236,31 +198,20 @@ def select_schedule(driver):
             elif user_input.lower() == 'teacher':
                 data_request = {
                     "request": "teacher",
-                    "semester": selected_semester
+                    "semester": selected_semester_id
                 }
-                # Сохраняем текст запроса в файл
-                teacher_file_path = os.path.join("..", "thirdElements", "teacher_request.txt")
-                with open(teacher_file_path, "w", encoding="utf-8") as file:
-                    file.write(json.dumps(data_request, indent=4))
+                teacher_request_file = save_request_to_file(data_request, "teacher_request.txt")
 
                 session_request = requests.Session()
                 session_request.mount('https://', NoVerifyHTTPAdapter())
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
-
-                teacher_response_file_path = os.path.join("..", "thirdElements", "teacher_response.txt")
-                with open(teacher_response_file_path, "w", encoding="utf-8") as file:
-                    file.write(response_request.text)
+                teacher_response_file = save_response_to_file(response_request, "teacher_response.txt")
 
                 if response_request.status_code == 200:
-                    output_teacher_response_file_path = os.path.join("..", "thirdElements", "output_teacher.php")
-                    with open(output_teacher_response_file_path, "w", encoding="utf-8") as file:
-                        file.write(response_request.text)
+                    output_teacher_response_file = save_response_to_file(response_request, "output_teacher.php")
 
-                    print("Файл успешно получен и сохранен как output.php.")
-
-                    with open(output_teacher_response_file_path, "r", encoding="utf-8") as file:
+                    with open(output_teacher_response_file, "r", encoding="utf-8") as file:
                         content = file.read()
-
                     options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
 
                     if options_output:
@@ -276,27 +227,18 @@ def select_schedule(driver):
 
                             data_schedule = {
                                 "request": "ttimetable",
-                                "semester": selected_semester,
+                                "semester": selected_semester_id,
                                 "teacher": selected_institute
                             }
-                            # Сохраняем текст запроса в файл
-                            schedule_request_file_path = os.path.join("..", "thirdElements",
-                                                                             "schedule_request.txt")
-                            with open(schedule_request_file_path, "w", encoding="utf-8") as file:
-                                file.write(json.dumps(data_schedule, indent=4))
+                            schedule_request_file = save_request_to_file(data_schedule, "schedule_request.txt")
 
                             session_schedule = requests.Session()
                             session_schedule.mount('https://', NoVerifyHTTPAdapter())
                             response_schedule = session_schedule.post(
                                 "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
+                            schedule_response_file = save_response_to_file(response_schedule, "schedule_response.txt")
 
-                            schedule_response_file_path = os.path.join("..", "thirdElements",
-                                                                      "schedule_response.txt")
-                            with open(schedule_response_file_path, "w", encoding="utf-8") as file:
-                                file.write(response_schedule.text)
-
-                            process_schedule_response(response_schedule, selected_semester)
+                            process_schedule_response(response_schedule, selected_semester_id)
                 break
             elif user_input.lower() != 'student' and user_input.lower() != 'teacher':
                 print("Неверный ввод. Введите 'student' или 'teacher'.")
-

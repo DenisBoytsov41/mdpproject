@@ -39,13 +39,13 @@ def process_schedule_response(response_schedule, semester):
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
             # Записываем результат запроса в файл
-            with open("thirdElements/output_schedule.php", "w", encoding="utf-8") as file:
+            with open("../thirdElements/output_schedule.php", "w", encoding="utf-8") as file:
                 file.write(response_schedule.text)
 
             print("Файл успешно получен и сохранен как output_schedule.php.")
 
             # Загрузить данные из файла
-            with open("thirdElements/output_schedule.php", "r", encoding="utf-8") as file:
+            with open("../thirdElements/output_schedule.php", "r", encoding="utf-8") as file:
                 content = file.read()
 
             # Извлечь корректный JSON из строки
@@ -107,12 +107,12 @@ def process_schedule_response(response_schedule, semester):
     else:
         # print("Неверный семестр для обработки.")
         if response_schedule.status_code == 200:
-            with open("thirdElements/output_schedule.php", "w", encoding="utf-8") as file:
+            with open("../thirdElements/output_schedule.php", "w", encoding="utf-8") as file:
                 file.write(response_schedule.text)
 
             print("Файл успешно получен и сохранен как output_schedule.php.")
             # Загрузить данные из файла
-            with open("thirdElements/output_schedule.php", "r", encoding="utf-8") as file:
+            with open("../thirdElements/output_schedule.php", "r", encoding="utf-8") as file:
                 content = file.read()
 
             content = content.replace("z[[", "").replace("]]", "")
@@ -258,7 +258,7 @@ try:
                     "semester": selected_semester
                 }
                 # Сохраняем текст запроса в файл
-                with open("thirdElements/institute_request.txt", "w", encoding="utf-8") as file:
+                with open("../thirdElements/institute_request.txt", "w", encoding="utf-8") as file:
                     file.write(json.dumps(data_request, indent=4))
 
                 # Создается объект сессии session_request из библиотеки requests.
@@ -268,19 +268,19 @@ try:
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
 
                 # Сохраняем текст ответа в файл
-                with open("thirdElements/institute_response.txt", "w", encoding="utf-8") as file:
+                with open("../thirdElements/institute_response.txt", "w", encoding="utf-8") as file:
                     file.write(response_request.text)
 
                 # Обработка ответа сервера для запроса института
                 if response_request.status_code == 200:
                     # Записываем результат запроса в файл
-                    with open("thirdElements/output.php", "w", encoding="utf-8") as file:
+                    with open("../thirdElements/output.php", "w", encoding="utf-8") as file:
                         file.write(response_request.text)
 
                     print("Файл успешно получен и сохранен как output.php.")
 
                     # Читаем институты из файла output.php
-                    with open("thirdElements/output.php", "r", encoding="utf-8") as file:
+                    with open("../thirdElements/output.php", "r", encoding="utf-8") as file:
                         content = file.read()
 
                     # Просто используем строку, не оборачиваем в BeautifulSoup, так как это не полноценный HTML-документ
@@ -309,7 +309,7 @@ try:
                             }
 
                             # Сохраняем текст запроса в файл
-                            with open("thirdElements/speciality_request.txt", "w", encoding="utf-8") as file:
+                            with open("../thirdElements/speciality_request.txt", "w", encoding="utf-8") as file:
                                 file.write(json.dumps(data_speciality, indent=4))
 
                             session_speciality = requests.Session()
@@ -318,19 +318,19 @@ try:
                                                                           data=data_speciality)
 
                             # Сохраняем текст ответа в файл
-                            with open("thirdElements/speciality_response.txt", "w", encoding="utf-8") as file:
+                            with open("../thirdElements/speciality_response.txt", "w", encoding="utf-8") as file:
                                 file.write(response_speciality.text)
 
                             # Обработка ответа сервера для запроса специальности
                             if response_speciality.status_code == 200:
                                 # Записываем результат запроса в файл
-                                with open("thirdElements/output_speciality.php", "w", encoding="utf-8") as file:
+                                with open("../thirdElements/output_speciality.php", "w", encoding="utf-8") as file:
                                     file.write(response_speciality.text)
 
                                 print("Файл успешно получен и сохранен как output_speciality.php.")
 
                                 # Читаем специальности из файла output_speciality.php
-                                with open("thirdElements/output_speciality.php", "r", encoding="utf-8") as file:
+                                with open("../thirdElements/output_speciality.php", "r", encoding="utf-8") as file:
                                     content = file.read()
 
                                 # Просто используем строку, не оборачиваем в BeautifulSoup, так как это не полноценный HTML-документ
@@ -359,7 +359,7 @@ try:
                                         }
 
                                         # Сохраняем текст запроса в файл
-                                        with open("thirdElements/group_request.txt", "w", encoding="utf-8") as file:
+                                        with open("../thirdElements/group_request.txt", "w", encoding="utf-8") as file:
                                             file.write(json.dumps(data_group, indent=4))
 
                                         session_group = requests.Session()
@@ -368,19 +368,19 @@ try:
                                                                             data=data_group)
 
                                         # Сохраняем текст ответа в файл
-                                        with open("thirdElements/group_response.txt", "w", encoding="utf-8") as file:
+                                        with open("../thirdElements/group_response.txt", "w", encoding="utf-8") as file:
                                             file.write(response_group.text)
 
                                         # Обработка ответа сервера для запроса группы
                                         if response_group.status_code == 200:
                                             # Записываем результат запроса в файл
-                                            with open("thirdElements/output_group.php", "w", encoding="utf-8") as file:
+                                            with open("../thirdElements/output_group.php", "w", encoding="utf-8") as file:
                                                 file.write(response_group.text)
 
                                             print("Файл успешно получен и сохранен как output_group.php.")
 
                                             # Читаем группы из файла output_group.php
-                                            with open("thirdElements/output_group.php", "r", encoding="utf-8") as file:
+                                            with open("../thirdElements/output_group.php", "r", encoding="utf-8") as file:
                                                 content = file.read()
 
                                             # Просто используем строку, не оборачиваем в BeautifulSoup, так как это не полноценный HTML-документ
@@ -412,7 +412,7 @@ try:
                                                     }
 
                                                     # Сохраняем текст запроса в файл
-                                                    with open("thirdElements/schedule_request.txt", "w", encoding="utf-8") as file:
+                                                    with open("../thirdElements/schedule_request.txt", "w", encoding="utf-8") as file:
                                                         file.write(json.dumps(data_schedule, indent=4))
 
                                                     session_schedule = requests.Session()
@@ -421,7 +421,7 @@ try:
                                                         "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
 
                                                     # Сохраняем текст ответа в файл
-                                                    with open("thirdElements/schedule_response.txt", "w", encoding="utf-8") as file:
+                                                    with open("../thirdElements/schedule_response.txt", "w", encoding="utf-8") as file:
                                                         file.write(response_schedule.text)
 
                                                     process_schedule_response(response_schedule,selected_semester)
@@ -456,7 +456,7 @@ try:
                     "semester": selected_semester
                 }
                 # Сохраняем текст запроса в файл
-                with open("thirdElements/teacher_request.txt", "w", encoding="utf-8") as file:
+                with open("../thirdElements/teacher_request.txt", "w", encoding="utf-8") as file:
                     file.write(json.dumps(data_request, indent=4))
 
                 # Создается объект сессии session_request из библиотеки requests.
@@ -466,19 +466,19 @@ try:
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
 
                 # Сохраняем текст ответа в файл
-                with open("thirdElements/teacher_response.txt", "w", encoding="utf-8") as file:
+                with open("../thirdElements/teacher_response.txt", "w", encoding="utf-8") as file:
                     file.write(response_request.text)
 
                 # Обработка ответа сервера для запроса института
                 if response_request.status_code == 200:
                     # Записываем результат запроса в файл
-                    with open("thirdElements/output_teacher.php", "w", encoding="utf-8") as file:
+                    with open("../thirdElements/output_teacher.php", "w", encoding="utf-8") as file:
                         file.write(response_request.text)
 
                     print("Файл успешно получен и сохранен как output.php.")
 
                     # Читаем институты из файла output.php
-                    with open("thirdElements/output_teacher.php", "r", encoding="utf-8") as file:
+                    with open("../thirdElements/output_teacher.php", "r", encoding="utf-8") as file:
                         content = file.read()
 
                     # Просто используем строку, не оборачиваем в BeautifulSoup, так как это не полноценный HTML-документ
@@ -506,7 +506,7 @@ try:
                                 "teacher": selected_institute
                             }
                             # Сохраняем текст запроса в файл
-                            with open("thirdElements/schedule_request.txt", "w", encoding="utf-8") as file:
+                            with open("../thirdElements/schedule_request.txt", "w", encoding="utf-8") as file:
                                 file.write(json.dumps(data_schedule, indent=4))
 
                             session_schedule = requests.Session()
@@ -515,7 +515,7 @@ try:
                                 "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
 
                             # Сохраняем текст ответа в файл
-                            with open("thirdElements/schedule_response.txt", "w", encoding="utf-8") as file:
+                            with open("../thirdElements/schedule_response.txt", "w", encoding="utf-8") as file:
                                 file.write(response_schedule.text)
 
                             process_schedule_response(response_schedule,selected_semester)

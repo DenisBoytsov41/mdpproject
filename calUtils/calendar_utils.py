@@ -157,9 +157,6 @@ def create_icalendar(data):
                                 else:
                                     holiday_date = holiday_dates[i]
                                     next_holiday_date = holiday_dates[i + 1]
-                                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_dates[i],holiday_dates[i],
-                                                                                             type_weekStart, week_type)
-                                    type_weekStart = get_current_week_type(start_date2)
                                     while holiday_date == start_date2:
                                         start_date2, end_date2 = adjust_dates_based_on_week_type(start_date2,end_date2,
                                                                                                  type_weekStart,

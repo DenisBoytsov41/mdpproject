@@ -31,3 +31,15 @@ def get_current_semester_end():
         end_date = datetime(start_date.year, 6, 30)
 
     return end_date
+
+def adjust_dates_based_on_week_type(start_date, end_date, type_weekStart, week_type):
+    if (week_type == "Над чертой" or week_type == "Под чертой") and week_type == type_weekStart:
+        start_date += timedelta(days=14)
+        end_date += timedelta(days=14)
+    elif (week_type == "Над чертой" or week_type == "Под чертой") and week_type != type_weekStart:
+        start_date += timedelta(days=7)
+        end_date += timedelta(days=7)
+    elif week_type == "Общая":
+        start_date += timedelta(days=7)
+        end_date += timedelta(days=7)
+    return start_date, end_date

@@ -35,64 +35,154 @@ def create_icalendar(data):
                 start_date = datetime.strptime(start_date_str, "%d.%m.%Y")
                 end_date = datetime.strptime(end_date_str, "%d.%m.%Y")
                 type_weekStart = get_current_week_type(start_date)
-                holiday_used = False
-                flag_data = start_date + timedelta(days=7)
+                holiday_dates = []
+                start_date_vrem = start_date
+                end_date_vrem = start_date
 
-                while flag_data < end_date:
-                    end_d = start_date
+                while start_date_vrem <= end_date:
+                    end_date_vrem = start_date_vrem
                     for holiday_date in semester_holidays:
-                        if end_d == holiday_date:
-                            create_event(cal, entry, start_date, start_date, week_type, holiday_date, entry.get("Семестр"))
-                            holiday_used = True
-                        start_date, end_d = adjust_dates_based_on_week_type(start_date, end_d, type_weekStart,
-                                                                               week_type)
-                        type_weekStart = get_current_week_type(start_date)
-                        flag_data += timedelta(days=7)
+                        if end_date_vrem == holiday_date:
+                            holiday_dates.append(holiday_date)
+                    start_date_vrem, end_date_vrem = adjust_dates_based_on_week_type(start_date_vrem, end_date_vrem,
+                                                                                     type_weekStart, week_type)
+                    type_weekStart = get_current_week_type(start_date_vrem)
 
-                if not holiday_used:
-                    create_event(cal, entry, start_date, start_date, week_type, end_date, entry.get("Семестр"))
+                print(holiday_dates)
+                start_date2, end_date2 = start_date, start_date
+                if not holiday_dates:
+                    create_event(cal, entry, start_date, start_date, week_type, end_date,
+                                 entry.get("Семестр"))
+                elif len(holiday_dates) == 1:
+                    holiday_date = holiday_dates[0]
+                    create_event(cal, entry, start_date, start_date, week_type,
+                                 holiday_date - timedelta(days=2), entry.get("Семестр"))
+                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                             type_weekStart, week_type)
+                    type_weekStart = get_current_week_type(start_date2)
+                    create_event(cal, entry, start_date2, end_date2, week_type,
+                                 end_date, entry.get("Семестр"))
+                else:
+                    used_break = False
+                    for i, holiday_date in enumerate(holiday_dates):
+                        if i == 0:
+                            create_event(cal, entry, start_date2, end_date2, week_type,
+                                         holiday_date - timedelta(days=2), entry.get("Семестр"))
+                            start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                                     type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date2)
+                        elif i == len(holiday_dates) - 1:
+                            create_event(cal, entry, start_date2, end_date2, week_type,
+                                         holiday_dates[i] - timedelta(days=2), entry.get("Семестр"))
+                            start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                                     type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date2)
+                            create_event(cal, entry, start_date2, end_date2, week_type, end_date,
+                                         entry.get("Семестр"))
+                        else:
+                            holiday_date = holiday_dates[i]
+                            next_holiday_date = holiday_dates[i + 1]
+                            start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_dates[i], holiday_dates[i],
+                                                                                     type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date2)
+                            while holiday_date == start_date2:
+                                start_date2, end_date2 = adjust_dates_based_on_week_type(start_date2, end_date2,
+                                                                                         type_weekStart, week_type)
+                                type_weekStart = get_current_week_type(start_date2)
+                            if holiday_date < start_date2:
+                                create_event(cal, entry, start_date2, end_date2, week_type,
+                                             next_holiday_date - timedelta(days=2), entry.get("Семестр"))
+                            else:
+                                create_event(cal, entry, start_date2, end_date2, week_type,
+                                             holiday_date - timedelta(days=2), entry.get("Семестр"))
+                            start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_dates[i], holiday_dates[i],
+                                                                                     type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date2)
 
+                    if used_break:
+                        break
             else:
                 current_date = semester_start
                 end_semester = get_current_semester_end()
                 while current_date <= end_semester:
                     if current_date.strftime("%A").lower() == entry.get("День недели").lower():
                         type_weekStart = get_current_week_type(current_date)
-                        holiday_used = False
-                        flag_data = current_date + timedelta(days=7)
                         start_date = current_date
+                        holiday_dates = []
 
-                        while flag_data < end_semester:
+                        while start_date <= end_semester:
                             end_date = start_date
                             for holiday_date in semester_holidays:
                                 if end_date == holiday_date:
-                                    create_event(cal, entry, start_date, start_date, week_type, holiday_date,
-                                                 entry.get("Семестр"))
-                                    holiday_used = True
-                                start_date, end_date = adjust_dates_based_on_week_type(start_date, end_date,
-                                                                                    type_weekStart,
-                                                                                    week_type)
-                                type_weekStart = get_current_week_type(start_date)
-                                flag_data += timedelta(days=7)
+                                    holiday_dates.append(holiday_date)
+                            start_date, end_date = adjust_dates_based_on_week_type(start_date, end_date,
+                                                                                   type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date)
 
-                        if not holiday_used:
-                            create_event(cal, entry, start_date, start_date, week_type, end_semester, entry.get("Семестр"))
-                        break
+                        print(holiday_dates)
+                        start_date2, end_date2 = current_date, current_date
+                        if not holiday_dates:
+                            create_event(cal, entry, current_date, current_date, week_type, end_semester,
+                                         entry.get("Семестр"))
+                            break
+                        elif len(holiday_dates) == 1:
+                            holiday_date = holiday_dates[0]
+                            create_event(cal, entry, current_date, current_date, week_type,
+                                         holiday_date - timedelta(days=2), entry.get("Семестр"))
+                            start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                                   type_weekStart, week_type)
+                            type_weekStart = get_current_week_type(start_date2)
+                            create_event(cal, entry, start_date2, end_date2, week_type,
+                                         end_semester, entry.get("Семестр"))
+                            break
+                        else:
+                            used_break = False
+                            for i, holiday_date in enumerate(holiday_dates):
+                                if i == 0:
+                                    create_event(cal, entry, start_date2, end_date2, week_type, holiday_date - timedelta(days=2),
+                                                 entry.get("Семестр"))
+                                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                                            type_weekStart, week_type)
+                                    type_weekStart = get_current_week_type(start_date2)
+                                elif i == len(holiday_dates) - 1:
+                                    create_event(cal, entry, start_date2, end_date2, week_type,
+                                                 holiday_dates[i] - timedelta(days=2), entry.get("Семестр"))
+                                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_date, holiday_date,
+                                                                                             type_weekStart, week_type)
+                                    type_weekStart = get_current_week_type(start_date2)
+                                    create_event(cal, entry, start_date2, end_date2, week_type, end_semester,
+                                                 entry.get("Семестр"))
+                                    used_break = True
+                                    break
+                                else:
+                                    holiday_date = holiday_dates[i]
+                                    next_holiday_date = holiday_dates[i + 1]
+                                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_dates[i],holiday_dates[i],
+                                                                                             type_weekStart, week_type)
+                                    type_weekStart = get_current_week_type(start_date2)
+                                    while holiday_date == start_date2:
+                                        start_date2, end_date2 = adjust_dates_based_on_week_type(start_date2,end_date2,
+                                                                                                 type_weekStart,
+                                                                                                 week_type)
+                                        type_weekStart = get_current_week_type(start_date2)
+                                    if holiday_date < start_date2:
+                                        create_event(cal, entry, start_date2, end_date2, week_type, next_holiday_date - timedelta(days=2),
+                                                 entry.get("Семестр"))
+                                    else:
+                                        create_event(cal, entry, start_date2, end_date2, week_type,
+                                                     holiday_date - timedelta(days=2),
+                                                     entry.get("Семестр"))
+                                    start_date2, end_date2 = adjust_dates_based_on_week_type(holiday_dates[i], holiday_dates[i],
+                                                                                             type_weekStart, week_type)
+                                    type_weekStart = get_current_week_type(start_date2)
+                            if used_break:
+                                break
                     current_date += timedelta(days=1)
         else:
             start_date_str = entry.get("Дата")
             start_date = datetime.strptime(start_date_str, "%Y.%m.%d")
-            end_date = get_current_semester_end()
-            holiday_used = False
-            for holiday_date in semester_holidays:
-                if end_date > holiday_date:
-                    create_event(cal, entry, start_date, start_date, None, holiday_date,
-                                 entry.get("Семестр"))
-                    start_date = holiday_date + timedelta(days=1)
-                    holiday_used = True
+            create_event(cal, entry, start_date, start_date, None, None, entry.get("Семестр"))
 
-            if not holiday_used:
-                create_event(cal, entry, start_date, start_date, None, None, entry.get("Семестр"))
 
     file_path = filedialog.asksaveasfilename(defaultextension=".ics", filetypes=[("iCalendar files", "*.ics")])
     if file_path:
@@ -120,7 +210,9 @@ def create_event(cal, entry, start_date, end_date, week_type, end_semester, seme
         else:
             rule['interval'] = 1
 
-        if week_type == "Над чертой":
+        sem_start = get_current_semester_start()
+
+        if week_type == "Над чертой" and start_date - sem_start <= timedelta(days=7):
             start_date += timedelta(days=7)
             end_date += timedelta(days=7)
 
@@ -128,12 +220,13 @@ def create_event(cal, entry, start_date, end_date, week_type, end_semester, seme
 
         event.add('rrule', rule)
 
-    if week_type is None and end_semester is not None:
-        end_date = end_semester + timedelta(days=1)
+    # Проверяем, что end_semester больше start_date
+    if end_semester is not None and end_semester > start_date:
+        event.add('dtstart', start_date + timedelta(hours=start_time.hour, minutes=start_time.minute))
+        event.add('dtend', end_date + timedelta(hours=end_time.hour, minutes=end_time.minute))
+        event.add('summary', f'{entry["Название предмета"]} ({week_type})' if week_type else entry["Название предмета"])
+        event.add('location', entry["Аудитория"])
 
-    event.add('dtstart', start_date + timedelta(hours=start_time.hour, minutes=start_time.minute))
-    event.add('dtend', end_date + timedelta(hours=end_time.hour, minutes=end_time.minute))
-    event.add('summary', f'{entry["Название предмета"]} ({week_type})' if week_type else entry["Название предмета"])
-    event.add('location', entry["Аудитория"])
-
-    cal.add_component(event)
+        cal.add_component(event)
+    else:
+        print("Ошибка: Дата окончания семестра должна быть позже даты начала.")

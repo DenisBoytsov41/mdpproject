@@ -2,24 +2,72 @@ BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//KSU//RU
 BEGIN:VEVENT
-SUMMARY:Безопасность жизнедеятельности (По
+SUMMARY:Информационная безопасность (Общая)
+DTSTART:20240205T083000
+DTEND:20240205T100000
+RRULE:FREQ=WEEKLY;UNTIL=20240428T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
+ ина А.Г.\nАудитория: Е-327\nГруппа: 21-ИСбо-2а
+LOCATION:Е-327
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Информационная безопасность (Общая)
+DTSTART:20240506T083000
+DTEND:20240506T100000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
+ ина А.Г.\nАудитория: Е-327\nГруппа: 21-ИСбо-2а
+LOCATION:Е-327
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Тестирование информационных систем
+  (Общая)
+DTSTART:20240205T101000
+DTEND:20240205T114000
+RRULE:FREQ=WEEKLY;UNTIL=20240428T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
+ ова Е.А.\nАудитория: Е-321\nГруппа: 21-ИСбо-2а
+LOCATION:Е-321
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Тестирование информационных систем
+  (Общая)
+DTSTART:20240506T101000
+DTEND:20240506T114000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
+ ова Е.А.\nАудитория: Е-321\nГруппа: 21-ИСбо-2а
+LOCATION:Е-321
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Безопасность жизнедеятельности (На
  д чертой)
-DTSTART:20240205T115000
-DTEND:20240205T132000
-RRULE:FREQ=WEEKLY;UNTIL=20240428T000000;INTERVAL=2
+DTSTART:20240212T115000
+DTEND:20240212T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
 DESCRIPTION:практика \nПреподаватель/Группа: Ш
  абарова О.Н.\nАудитория: Е-303б
 LOCATION:Е-303б
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Безопасность жизнедеятельности (По
- д чертой)
+SUMMARY:Психология личности и группы (Под че
+ ртой)
+DTSTART:20240205T115000
+DTEND:20240205T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240428T000000;INTERVAL=2
+DESCRIPTION:практика \nПреподаватель/Группа: Б
+ ородулина С.В.\nАудитория: Е-303а
+LOCATION:Е-303а
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Психология личности и группы (Под че
+ ртой)
 DTSTART:20240513T115000
 DTEND:20240513T132000
 RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
-DESCRIPTION:практика \nПреподаватель/Группа: Ш
- абарова О.Н.\nАудитория: Е-303б
-LOCATION:Е-303б
+DESCRIPTION:практика \nПреподаватель/Группа: Б
+ ородулина С.В.\nАудитория: Е-303а
+LOCATION:Е-303а
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Психология личности и группы (24 часа
@@ -42,116 +90,136 @@ DESCRIPTION:лекция \nПреподаватель/Группа: Кам
 LOCATION:Е-326
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Психология личности и группы (16 часо
- в) (Общая)
-DTSTART:20240311T154000
-DTEND:20240311T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240428T000000;INTERVAL=1
-DESCRIPTION:практика \nПреподаватель/Группа: Б
- ородулина С.В.\nАудитория: Е-313
-LOCATION:Е-313
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Военная подготовка (Общая)
+SUMMARY:Информационная безопасность (Общая)
 DTSTART:20240206T083000
 DTEND:20240206T100000
 RRULE:FREQ=WEEKLY;UNTIL=20240429T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
+ ина А.Г.\nАудитория: Е-327\nГруппа: 21-ИСбо-2б
+LOCATION:Е-327
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Информационная безопасность (Общая)
+DTSTART:20240507T083000
+DTEND:20240507T100000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
+ ина А.Г.\nАудитория: Е-327\nГруппа: 21-ИСбо-2б
+LOCATION:Е-327
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Интеллектуальные информационные си
+ стемы (Общая)
+DTSTART:20240206T101000
+DTEND:20240206T114000
+RRULE:FREQ=WEEKLY;UNTIL=20240429T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Исаева 
+ М.В.\nАудитория: Е-323\nГруппа: 21-ИСбо-2б
+LOCATION:Е-323
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Интеллектуальные информационные си
+ стемы (Общая)
+DTSTART:20240507T101000
+DTEND:20240507T114000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Исаева 
+ М.В.\nАудитория: Е-323\nГруппа: 21-ИСбо-2б
+LOCATION:Е-323
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Интеллектуальные информационные си
+ стемы (Общая)
+DTSTART:20240206T115000
+DTEND:20240206T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240429T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Исаева 
+ М.В.\nАудитория: Е-323\nГруппа: 21-ИСбо-2а
+LOCATION:Е-323
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Интеллектуальные информационные си
+ стемы (Общая)
+DTSTART:20240507T115000
+DTEND:20240507T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Исаева 
+ М.В.\nАудитория: Е-323\nГруппа: 21-ИСбо-2а
+LOCATION:Е-323
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Методы и средства проектирования ин
+ формационных систем (Над чертой)
+DTSTART:20240213T115000
+DTEND:20240213T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
+DESCRIPTION:л/р \nПреподаватель/Группа: Орлов А
+ .В.\nАудитория: Е-324\nГруппа: 21-ИСбо-2б
+LOCATION:Е-324
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Методы и средства проектирования ин
+ формационных систем (Над чертой)
+DTSTART:20240213T140000
+DTEND:20240213T153000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
+DESCRIPTION:л/р \nПреподаватель/Группа: Орлов А
+ .В.\nАудитория: Е-324\nГруппа: 21-ИСбо-2а
+LOCATION:Е-324
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Web-программирование (Под чертой)
+DTSTART:20240206T140000
+DTEND:20240206T153000
+RRULE:FREQ=WEEKLY;UNTIL=20240429T000000;INTERVAL=2
+DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
+ ова Е.А.\nАудитория: Е-321\nГруппа: 21-ИСбо-2а
+LOCATION:Е-321
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Web-программирование (Под чертой)
+DTSTART:20240514T140000
+DTEND:20240514T153000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
+DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
+ ова Е.А.\nАудитория: Е-321\nГруппа: 21-ИСбо-2а
+LOCATION:Е-321
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Web-программирование (Над чертой)
+DTSTART:20240213T140000
+DTEND:20240213T153000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
+DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
+ ова Е.А.\nАудитория: Е-321\nГруппа: 21-ИСбо-2б
+LOCATION:Е-321
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Военная подготовка (Общая)
+DTSTART:20240207T083000
+DTEND:20240207T100000
+RRULE:FREQ=WEEKLY;UNTIL=20240430T000000;INTERVAL=1
 DESCRIPTION:практика \nПреподаватель/Группа: \n
  Аудитория: Военный учебный центр
 LOCATION:Военный учебный центр
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Военная подготовка (Общая)
-DTSTART:20240507T083000
-DTEND:20240507T100000
-RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DTSTART:20240508T083000
+DTEND:20240508T100000
+RRULE:FREQ=WEEKLY;UNTIL=20240611T000000;INTERVAL=1
 DESCRIPTION:практика \nПреподаватель/Группа: \n
  Аудитория: Военный учебный центр
 LOCATION:Военный учебный центр
 END:VEVENT
 BEGIN:VEVENT
-SUMMARY:Информационная безопасность (Общая)
-DTSTART:20240207T115000
-DTEND:20240207T132000
-RRULE:FREQ=WEEKLY;UNTIL=20240430T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
- ина А.Г.\nАудитория: Е-327
-LOCATION:Е-327
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Информационная безопасность (Общая)
-DTSTART:20240508T115000
-DTEND:20240508T132000
-RRULE:FREQ=WEEKLY;UNTIL=20240611T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
- ина А.Г.\nАудитория: Е-327
-LOCATION:Е-327
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Информационная безопасность (Общая)
-DTSTART:20240619T115000
-DTEND:20240619T132000
+SUMMARY:Военная подготовка (Общая)
+DTSTART:20240619T083000
+DTEND:20240619T100000
 RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Дружин
- ина А.Г.\nАудитория: Е-327
-LOCATION:Е-327
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Тестирование информационных систем
-  (Общая)
-DTSTART:20240207T140000
-DTEND:20240207T153000
-RRULE:FREQ=WEEKLY;UNTIL=20240430T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-319
-LOCATION:Е-319
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Тестирование информационных систем
-  (Общая)
-DTSTART:20240508T140000
-DTEND:20240508T153000
-RRULE:FREQ=WEEKLY;UNTIL=20240611T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-319
-LOCATION:Е-319
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Тестирование информационных систем
-  (Общая)
-DTSTART:20240619T140000
-DTEND:20240619T153000
-RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-319
-LOCATION:Е-319
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Web-программирование (Под чертой)
-DTSTART:20240207T154000
-DTEND:20240207T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240430T000000;INTERVAL=2
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-321
-LOCATION:Е-321
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Web-программирование (Под чертой)
-DTSTART:20240515T154000
-DTEND:20240515T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240611T000000;INTERVAL=2
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-321
-LOCATION:Е-321
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Web-программирование (Под чертой)
-DTSTART:20240626T154000
-DTEND:20240626T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
-DESCRIPTION:л/р \nПреподаватель/Группа: Демчин
- ова Е.А.\nАудитория: Е-321
-LOCATION:Е-321
+DESCRIPTION:практика \nПреподаватель/Группа: \n
+ Аудитория: Военный учебный центр
+LOCATION:Военный учебный центр
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Физическая культура и спорт (Общая)
@@ -198,6 +266,26 @@ RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
 DESCRIPTION:лекция \nПреподаватель/Группа: Кип
  рина Л.Ю.\nАудитория: Е-326
 LOCATION:Е-326
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Тестирование информационных систем
+  (Общая)
+DTSTART:20240208T115000
+DTEND:20240208T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240508T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Киприн
+ а Л.Ю.\nАудитория: Е-323\nГруппа: 21-ИСбо-2б
+LOCATION:Е-323
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Тестирование информационных систем
+  (Общая)
+DTSTART:20240516T115000
+DTEND:20240516T132000
+RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
+DESCRIPTION:л/р \nПреподаватель/Группа: Киприн
+ а Л.Ю.\nАудитория: Е-323\nГруппа: 21-ИСбо-2б
+LOCATION:Е-323
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Информационная безопасность (Общая)
@@ -274,36 +362,6 @@ RRULE:FREQ=WEEKLY;UNTIL=20240420T000000;INTERVAL=2
 DESCRIPTION:лекция \nПреподаватель/Группа: Шаб
  арова О.Н.\nАудитория: Е-523
 LOCATION:Е-523
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Методы и средства проектирования ин
- формационных систем (Над чертой)
-DTSTART:20240216T154000
-DTEND:20240216T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240509T000000;INTERVAL=2
-DESCRIPTION:л/р \nПреподаватель/Группа: Орлов А
- .В.\nАудитория: Е-324
-LOCATION:Е-324
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Методы и средства проектирования ин
- формационных систем (Над чертой)
-DTSTART:20240524T154000
-DTEND:20240524T171000
-RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=2
-DESCRIPTION:л/р \nПреподаватель/Группа: Орлов А
- .В.\nАудитория: Е-324
-LOCATION:Е-324
-END:VEVENT
-BEGIN:VEVENT
-SUMMARY:Интеллектуальные информационные си
- стемы (Общая)
-DTSTART:20240210T101000
-DTEND:20240210T114000
-RRULE:FREQ=WEEKLY;UNTIL=20240701T000000;INTERVAL=1
-DESCRIPTION:л/р \nПреподаватель/Группа: Денисо
- в А.Р.\nАудитория: ДОТ
-LOCATION:ДОТ
 END:VEVENT
 BEGIN:VEVENT
 SUMMARY:Интеллектуальные информационные си

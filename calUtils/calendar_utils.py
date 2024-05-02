@@ -190,11 +190,14 @@ def create_icalendar(data):
 def create_event(cal, entry, start_date, end_date, week_type, end_semester, semester):
     event = Event()
     if semester != 2 and semester != 3:
-        event.add('description',
-                  f'{entry["Тип занятия"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}')
+        description = f'{entry["Тип занятия"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}'
     else:
-        event.add('description',
-                  f'{entry["Тип занятия:"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}')
+        description = f'{entry["Тип занятия:"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}'
+
+    if entry.get("Группа"):
+        description += f'\nГруппа: {entry["Группа"]}'
+
+    event.add('description', description)
 
     start_time_str, end_time_str = entry["Время"].split(" - ")
     start_time = datetime.strptime(start_time_str, "%H:%M")

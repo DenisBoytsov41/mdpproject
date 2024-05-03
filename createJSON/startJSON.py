@@ -6,7 +6,6 @@ def main():
     driver = setup_driver()
     try:
         driver.get("https://timetable.ksu.edu.ru/")
-
         # Выбор расписания
         select_schedule(driver)
 

@@ -49,19 +49,13 @@ def select_schedule(driver):
                     "request": "institute",
                     "semester": selected_semester_id
                 }
-                inst_request_file = save_request_to_file(data_request, "institute_request.txt")
 
                 session_request = requests.Session()
                 session_request.mount('https://', NoVerifyHTTPAdapter())
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
-                inst_response_file = save_response_to_file(response_request, "institute_response.txt")
 
                 if response_request.status_code == 200:
-                    output_file = save_response_to_file(response_request, "output.php")
-
-                    with open(output_file, "r", encoding="utf-8") as file:
-                        content = file.read()
-                    options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
+                    options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', response_request.text)
 
                     if options_output:
                         print("Выберите институт:")
@@ -79,20 +73,13 @@ def select_schedule(driver):
                                 "semester": selected_semester_id,
                                 "institute": selected_institute
                             }
-                            spec_request_file = save_request_to_file(data_speciality, "speciality_request.txt")
 
                             session_speciality = requests.Session()
                             session_speciality.mount('https://', NoVerifyHTTPAdapter())
-                            response_speciality = session_speciality.post("https://timetable.ksu.edu.ru/engine.php",
-                                                                          data=data_speciality)
-                            spec_response_file = save_response_to_file(response_speciality, "speciality_response.txt")
+                            response_speciality = session_speciality.post("https://timetable.ksu.edu.ru/engine.php", data=data_speciality)
 
                             if response_speciality.status_code == 200:
-                                output_speciality_file = save_response_to_file(response_speciality, "output_speciality.php")
-
-                                with open(output_speciality_file, "r", encoding="utf-8") as file:
-                                    content = file.read()
-                                options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
+                                options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', response_speciality.text)
 
                                 if options_output:
                                     print("Выберите специальность:")
@@ -111,21 +98,13 @@ def select_schedule(driver):
                                             "institute": selected_institute,
                                             "speciality": selected_speciality
                                         }
-                                        group_request_file = save_request_to_file(data_group, "group_request.txt")
 
                                         session_group = requests.Session()
                                         session_group.mount('https://', NoVerifyHTTPAdapter())
-                                        response_group = session_group.post("https://timetable.ksu.edu.ru/engine.php",
-                                                                            data=data_group)
-                                        group_response_file = save_response_to_file(response_group, "group_response.txt")
+                                        response_group = session_group.post("https://timetable.ksu.edu.ru/engine.php", data=data_group)
 
                                         if response_group.status_code == 200:
-                                            output_group_file = save_response_to_file(response_group, "output_group.php")
-
-                                            with open(output_group_file, "r", encoding="utf-8") as file:
-                                                content = file.read()
-                                            options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>',
-                                                                        content)
+                                            options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', response_group.text)
 
                                             if options_output:
                                                 print("Выберите группу:")
@@ -145,13 +124,10 @@ def select_schedule(driver):
                                                         "speciality": selected_speciality,
                                                         "group": selected_group
                                                     }
-                                                    schedule_request_file = save_request_to_file(data_schedule, "schedule_request.txt")
 
                                                     session_schedule = requests.Session()
                                                     session_schedule.mount('https://', NoVerifyHTTPAdapter())
-                                                    response_schedule = session_schedule.post(
-                                                        "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
-                                                    schedule_response_file = save_response_to_file(response_schedule, "schedule_response.txt")
+                                                    response_schedule = session_schedule.post("https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
 
                                                     process_schedule_response(response_schedule, selected_semester_id)
 
@@ -160,8 +136,7 @@ def select_schedule(driver):
                                             else:
                                                 print("На странице нет групп.")
                                         else:
-                                            print(
-                                                f"Ошибка запроса для группы. Код статуса: {response_group.status_code}")
+                                            print(f"Ошибка запроса для группы. Код статуса: {response_group.status_code}")
 
                                     else:
                                         print("Недопустимый номер специальности.")
@@ -169,8 +144,7 @@ def select_schedule(driver):
                                     print("На странице нет специальностей.")
 
                             else:
-                                print(
-                                    f"Ошибка запроса для специальности. Код статуса: {response_speciality.status_code}")
+                                print(f"Ошибка запроса для специальности. Код статуса: {response_speciality.status_code}")
 
                         else:
                             print("Недопустимый номер института.")
@@ -186,19 +160,13 @@ def select_schedule(driver):
                     "request": "teacher",
                     "semester": selected_semester_id
                 }
-                teacher_request_file = save_request_to_file(data_request, "teacher_request.txt")
 
                 session_request = requests.Session()
                 session_request.mount('https://', NoVerifyHTTPAdapter())
                 response_request = session_request.post("https://timetable.ksu.edu.ru/engine.php", data=data_request)
-                teacher_response_file = save_response_to_file(response_request, "teacher_response.txt")
 
                 if response_request.status_code == 200:
-                    output_teacher_response_file = save_response_to_file(response_request, "output_teacher.php")
-
-                    with open(output_teacher_response_file, "r", encoding="utf-8") as file:
-                        content = file.read()
-                    options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', content)
+                    options_output = re.findall(r'<option value="([^"]+)">([^<]+)</option>', response_request.text)
 
                     if options_output:
                         print("Выберите преподавателя:")
@@ -216,13 +184,10 @@ def select_schedule(driver):
                                 "semester": selected_semester_id,
                                 "teacher": selected_institute
                             }
-                            schedule_request_file = save_request_to_file(data_schedule, "schedule_request.txt")
 
                             session_schedule = requests.Session()
                             session_schedule.mount('https://', NoVerifyHTTPAdapter())
-                            response_schedule = session_schedule.post(
-                                "https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
-                            schedule_response_file = save_response_to_file(response_schedule, "schedule_response.txt")
+                            response_schedule = session_schedule.post("https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
 
                             process_schedule_response(response_schedule, selected_semester_id)
                 break

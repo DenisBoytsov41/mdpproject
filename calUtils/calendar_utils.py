@@ -3,9 +3,9 @@ from datetime import datetime, timedelta
 from tkinter import filedialog
 from icalendar import Calendar, Event
 from icalendar import vRecur
-from semester_utils import get_current_week_type, get_current_semester_start, get_current_semester_end, adjust_dates_based_on_week_type
+from semester_utils import (get_current_week_type, get_current_semester_start,
+                            get_current_semester_end, adjust_dates_based_on_week_type, save_calendar, add_semester_holidays)
 from APIelements.holiday_or_weekend import extract_holidays
-
 
 def create_icalendar(data):
     cal = Calendar()
@@ -19,11 +19,7 @@ def create_icalendar(data):
     semester_start = get_current_semester_start()
     semester_end = get_current_semester_end()
 
-    semester_holidays = {}
-    for holiday in holidays_json:
-        holiday_date = datetime.strptime(holiday['date'], "%Y-%m-%d")
-        if semester_start <= holiday_date <= semester_end:
-            semester_holidays[holiday_date] = holiday_date
+    semester_holidays = add_semester_holidays(holidays_json, semester_start, semester_end)
 
     for entry in data:
         if entry.get("Семестр") in [2, 3]:
@@ -179,12 +175,7 @@ def create_icalendar(data):
             start_date_str = entry.get("Дата")
             start_date = datetime.strptime(start_date_str, "%Y.%m.%d")
             create_event(cal, entry, start_date, start_date, None, None, entry.get("Семестр"))
-
-
-    file_path = filedialog.asksaveasfilename(defaultextension=".ics", filetypes=[("iCalendar files", "*.ics")])
-    if file_path:
-        with open(file_path, 'wb') as f:
-            f.write(cal.to_ical())
+    save_calendar(cal)
 
 
 def create_event(cal, entry, start_date, end_date, week_type, end_semester, semester):

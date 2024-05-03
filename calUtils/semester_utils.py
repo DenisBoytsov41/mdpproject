@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from tkinter import filedialog
+
 
 def get_current_week_type(start_date, current_date=None):
     if current_date is None:
@@ -43,3 +45,17 @@ def adjust_dates_based_on_week_type(start_date, end_date, type_weekStart, week_t
         start_date += timedelta(days=7)
         end_date += timedelta(days=7)
     return start_date, end_date
+
+def save_calendar(cal):
+    file_path = filedialog.asksaveasfilename(defaultextension=".ics", filetypes=[("iCalendar files", "*.ics")])
+    if file_path:
+        with open(file_path, 'wb') as f:
+            f.write(cal.to_ical())
+
+def add_semester_holidays(holidays_json, semester_start, semester_end):
+    semester_holidays = {}
+    for holiday in holidays_json:
+        holiday_date = datetime.strptime(holiday['date'], "%Y-%m-%d")
+        if semester_start <= holiday_date <= semester_end:
+            semester_holidays[holiday_date] = holiday_date
+    return semester_holidays

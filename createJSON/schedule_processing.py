@@ -3,6 +3,7 @@ import csv
 import html
 import json
 from utils import replace_slash, decode_special_chars, NoVerifyHTTPAdapter
+from config import THIRD_ELEMENTS_DIR, CREATE_JSON_DIR, OUTPUT_SCHEDULE_FILE, PROCESSED_SCHEDULE_DATA_FILE
 
 
 def process_schedule_response(response_schedule, semester):
@@ -12,7 +13,7 @@ def process_schedule_response(response_schedule, semester):
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
             try:
-                output_file_path = os.path.join("..", "thirdElements", "output_schedule.php")
+                output_file_path = OUTPUT_SCHEDULE_FILE
                 # Записываем результат запроса в файл
                 with open(output_file_path, "w", encoding="utf-8") as file:
                     file.write(response_schedule.text)
@@ -68,7 +69,7 @@ def process_schedule_response(response_schedule, semester):
                     print()
 
                 # Сохранить данные в JSON файл
-                output_json_file = "processed_schedule_data.json"
+                output_json_file = PROCESSED_SCHEDULE_DATA_FILE
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4,
                               ensure_ascii=False)
@@ -84,7 +85,7 @@ def process_schedule_response(response_schedule, semester):
         # print("Неверный семестр для обработки.")
         if response_schedule.status_code == 200:
             try:
-                output_file_path = os.path.join("..", "thirdElements", "output_schedule.php")
+                output_file_path = OUTPUT_SCHEDULE_FILE
                 with open(output_file_path, "w", encoding="utf-8") as file:
                     file.write(response_schedule.text)
 
@@ -149,7 +150,7 @@ def process_schedule_response(response_schedule, semester):
 
                 processed_data = decode_special_chars(processed_data)
                 # Сохранение обработанных данных в JSON файл
-                output_json_file = "processed_schedule_data.json"
+                output_json_file = PROCESSED_SCHEDULE_DATA_FILE
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4, ensure_ascii=False)
 

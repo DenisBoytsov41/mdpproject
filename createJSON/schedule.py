@@ -1,5 +1,3 @@
-import json
-import os
 import re
 import requests
 from selenium.webdriver.common.by import By
@@ -7,19 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from schedule_processing import process_schedule_response
-from utils import NoVerifyHTTPAdapter
-
-def save_request_to_file(data_request, filename):
-    filepath = os.path.join("..", "thirdElements", filename)
-    with open(filepath, "w", encoding="utf-8") as file:
-        file.write(json.dumps(data_request, indent=4))
-    return filepath
-
-def save_response_to_file(response, filename):
-    filepath = os.path.join("..", "thirdElements", filename)
-    with open(filepath, "w", encoding="utf-8") as file:
-        file.write(response.text)
-    return filepath
+from utils import NoVerifyHTTPAdapter, save_response_to_file, save_request_to_file
 
 def select_schedule(driver):
     select_element_semester = WebDriverWait(driver, 10).until(

@@ -3,31 +3,21 @@ import csv
 import html
 import json
 from utils import replace_slash, decode_special_chars, NoVerifyHTTPAdapter
-from config import THIRD_ELEMENTS_DIR, CREATE_JSON_DIR, OUTPUT_SCHEDULE_FILE, PROCESSED_SCHEDULE_DATA_FILE
+from config import DB_DIR, CREATE_JSON_DIR
+from db.db_operations import load_data_from_json
 
 
-def process_schedule_response(response_schedule, semester):
+def process_schedule_response(response_schedule, semester, institute=None, speciality=None, group=None, teacher=None):
     # semester_id_mapping = {1: 8, 2: 4, 3: 3, 4: 2, 5: 1}
     semester_id_mapping = {8: 1, 4: 2, 3: 3, 2: 4, 1: 5}
 
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
             try:
-                output_file_path = OUTPUT_SCHEDULE_FILE
-                # Записываем результат запроса в файл
-                with open(output_file_path, "w", encoding="utf-8") as file:
-                    file.write(response_schedule.text)
-
-                print("Файл успешно получен и сохранен как output_schedule.php.")
-
-                # Загрузить данные из файла
-                with open(output_file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-
                 # Извлечь корректный JSON из строки
-                start_index = content.find("[")
-                end_index = content.rfind("]") + 1
-                json_data = content[start_index:end_index]
+                start_index = response_schedule.text.find("[")
+                end_index = response_schedule.text.rfind("]") + 1
+                json_data = response_schedule.text[start_index:end_index]
 
                 # Преобразовать данные
                 data = json.loads(json_data)
@@ -69,13 +59,18 @@ def process_schedule_response(response_schedule, semester):
                     print()
 
                 # Сохранить данные в JSON файл
-                output_json_file = PROCESSED_SCHEDULE_DATA_FILE
+                if teacher:
+                    output_json_file = f"schedule_{semester}_{teacher}.json"
+                else:
+                    output_json_file = f"schedule_{semester}_{institute}_{speciality}_{group}.json"
+                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4,
                               ensure_ascii=False)
 
                 print(
                     f"Данные успешно обработаны и сохранены в {output_json_file}.")
+                load_data_from_json(output_json_file)
             except Exception as e:
                 print(f"Произошла ошибка при обработке расписания: {e}")
         else:
@@ -85,16 +80,7 @@ def process_schedule_response(response_schedule, semester):
         # print("Неверный семестр для обработки.")
         if response_schedule.status_code == 200:
             try:
-                output_file_path = OUTPUT_SCHEDULE_FILE
-                with open(output_file_path, "w", encoding="utf-8") as file:
-                    file.write(response_schedule.text)
-
-                print("Файл успешно получен и сохранен как output_schedule.php.")
-                # Загрузить данные из файла
-                with open(output_file_path, "r", encoding="utf-8") as file:
-                    content = file.read()
-
-                content = content.replace("z[[", "").replace("]]", "")
+                content = response_schedule.text.replace("z[[", "").replace("]]", "")
 
                 # Разделить данные на строки
                 data_rows = content.split("],[")
@@ -150,11 +136,16 @@ def process_schedule_response(response_schedule, semester):
 
                 processed_data = decode_special_chars(processed_data)
                 # Сохранение обработанных данных в JSON файл
-                output_json_file = PROCESSED_SCHEDULE_DATA_FILE
+                if teacher:
+                    output_json_file = f"schedule_{semester}_{teacher}.json"
+                else:
+                    output_json_file = f"schedule_{semester}_{institute}_{speciality}_{group}.json"
+                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4, ensure_ascii=False)
 
                 print(f"Данные успешно обработаны и сохранены в {output_json_file}.")
+                load_data_from_json(output_json_file)
             except Exception as e:
                 print(f"Произошла ошибка при обработке расписания: {e}")
         else:

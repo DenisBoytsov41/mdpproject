@@ -11,10 +11,13 @@ class NoVerifyHTTPAdapter(HTTPAdapter):
 
 def replace_slash(input_string):
     try:
-        return input_string.replace("\\/", "/")
+        return input_string.replace("\\/", "/").replace("_", ".")
     except Exception as e:
         print(f"Произошла ошибка при замене слэша: {e}")
         return input_string
+
+def to_unicode_escape(input_str):
+    return input_str.encode('unicode_escape').decode('utf-8')
 
 def decode_special_chars(data):
     decoded_data_list = []
@@ -42,3 +45,16 @@ def save_response_to_file(response, filename):
     with open(filepath, "w", encoding="utf-8") as file:
         file.write(response.text)
     return filepath
+
+def shorten_filename(filename, max_length=200):
+    if len(filename) <= max_length:
+        return filename
+    else:
+        filename, extension = os.path.splitext(filename)
+        parts = filename.split("__")
+        first_part = parts[0]  # schedule
+        next_part = parts[1]
+        last_part = parts[-1]  # группа
+        truncated_name = first_part[:max_length // 2] + "__" + next_part + "__" + last_part
+        return truncated_name + extension
+

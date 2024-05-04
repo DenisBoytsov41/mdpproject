@@ -2,15 +2,37 @@ import os
 import sqlite3
 import json
 import re
+import sys
 from config import DB_DIR
 def connect_to_db():
     db_path = os.path.join(DB_DIR, 'schedule.db')
     return sqlite3.connect(db_path)
+def normalize_parameter(param):
+    try:
+        current_encoding = getattr(param, 'encoding', None)
+        if current_encoding is None or current_encoding.lower() != 'utf-8':
+            decoded_param = param.encode('utf-8').decode('unicode-escape')
+        else:
+            decoded_param = param
+
+        return decoded_param
+    except Exception as e:
+        print(f"Произошла ошибка при нормализации параметра: {e}")
+        return None
 
 def normalize_table_name(file_name):
-    normalized_name = re.sub(r'[^\w\s]', '', file_name)
-    normalized_name = normalized_name.replace(' ', '_')
-    return normalized_name
+    try:
+        words = re.findall(r'\w+', file_name)
+        normalized_name = '_'.join(words)
+        encoded_name = normalized_name.encode('utf-8')
+        decoded_name = encoded_name.decode('utf-8')
+        return decoded_name
+    except Exception as e:
+        print(f"Произошла ошибка при нормализации названия файла: {e}")
+        return None
+
+
+
 def add_schedule_to_db(schedule_data, table_name):
     try:
         conn = connect_to_db()
@@ -20,6 +42,7 @@ def add_schedule_to_db(schedule_data, table_name):
             CREATE TABLE IF NOT EXISTS {table_name} (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 day_of_week TEXT NOT NULL,
+                date TEXT,
                 time TEXT NOT NULL,
                 week_type TEXT NOT NULL,
                 subject TEXT NOT NULL,
@@ -29,26 +52,31 @@ def add_schedule_to_db(schedule_data, table_name):
                 group_name TEXT,
                 start_time TEXT,
                 end_time TEXT,
-                semester INTEGER NOT NULL
+                semester INTEGER NOT NULL,
+                file TEXT
             )
         ''')
 
         for entry in schedule_data:
+            # Проверка наличия ключей в записи расписания
+            day_of_week = entry.get('День недели', '')
+            date = entry.get('Дата', '')
+            time = entry.get('Время', '')
+            week_type = entry.get('Тип недели', '')
+            subject = entry.get('Название предмета', '')
+            classroom = entry.get('Аудитория', '')
+            teacher = entry.get('ФИО преподавателя', '')
+            lesson_type = entry.get('Тип занятия', '')
+            group_name = entry.get('Группа', '')
+            start_time = entry.get('Начало', '')
+            end_time = entry.get('Конец', '')
+            semester = entry.get('Семестр', '')
+
             cursor.execute(f'''
-                INSERT INTO {table_name} (day_of_week, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO {table_name} (day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                entry['День недели'],
-                entry['Время'],
-                entry['Тип недели'],
-                entry['Название предмета'],
-                entry['Аудитория'],
-                entry['ФИО преподавателя'],
-                entry['Тип занятия:'],
-                entry['Группа'],
-                entry['Начало'],
-                entry['Конец'],
-                entry['Семестр']
+                day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester
             ))
 
         conn.commit()

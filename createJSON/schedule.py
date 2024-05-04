@@ -173,23 +173,25 @@ def select_schedule(driver):
                         for i, (value, text) in enumerate(options_output, start=1):
                             print(f"{i}. {text}")
 
-                        selected_institute_index = int(input("Введите номер преподавателя: "))
+                        selected_teacher_index = int(input("Введите номер преподавателя: "))
 
-                        if 1 <= selected_institute_index <= len(options_output):
-                            selected_institute = options_output[selected_institute_index - 1][1]
-                            print(f"Выбран преподаватель: {selected_institute}")
+                        if 1 <= selected_teacher_index <= len(options_output):
+                            selected_teacher = options_output[selected_teacher_index - 1][1]
+                            print(f"Выбран преподаватель: {selected_teacher}")
 
                             data_schedule = {
                                 "request": "ttimetable",
                                 "semester": selected_semester_id,
-                                "teacher": selected_institute
+                                "teacher": selected_teacher
                             }
 
                             session_schedule = requests.Session()
                             session_schedule.mount('https://', NoVerifyHTTPAdapter())
                             response_schedule = session_schedule.post("https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
+                            print("Я тут")
+                            print(selected_teacher)
 
-                            process_schedule_response(response_schedule, selected_semester_id, teacher=selected_institute)
+                            process_schedule_response(response_schedule, selected_semester_id, teacher=selected_teacher)
                 break
             elif user_input.lower() != 'student' and user_input.lower() != 'teacher':
                 print("Неверный ввод. Введите 'student' или 'teacher'.")

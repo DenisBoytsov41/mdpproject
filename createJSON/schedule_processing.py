@@ -2,9 +2,9 @@ import os
 import csv
 import html
 import json
-from utils import replace_slash, decode_special_chars, NoVerifyHTTPAdapter
+from utils import replace_slash, decode_special_chars, NoVerifyHTTPAdapter, shorten_filename, to_unicode_escape
 from config import DB_DIR, CREATE_JSON_DIR
-from db.db_operations import load_data_from_json
+from db.db_operations import load_data_from_json, normalize_parameter, normalize_table_name
 
 
 def process_schedule_response(response_schedule, semester, institute=None, speciality=None, group=None, teacher=None):
@@ -35,6 +35,15 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                                 "5": "15:40 - 17:10", "6": "17:20 - 18:50",
                                 "7": "19:00 - 20:30"}
 
+                if teacher:
+                    output_json_file = f"schedule_{semester}__{normalize_table_name(teacher)}.json"
+                    param_search = f"schedule_{semester}||{teacher}"
+                else:
+                    output_json_file = f"schedule_{semester}__{normalize_table_name(institute)}__{normalize_table_name(speciality)}__{normalize_table_name(group)}.json"
+                    param_search = f"schedule_{semester}||{institute}||{speciality}||{group}"
+                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
+                output_json_file = shorten_filename(output_json_file)
+
                 # Преобразовать данные
                 processed_data = []
                 for entry in data:
@@ -45,25 +54,21 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                         "Название предмета": entry["subject1"],
                         "Аудитория": entry["subject2"],
                         "ФИО преподавателя": entry["subject3"],
-                        "Тип занятия:": entry["lessontype"],
+                        "Тип занятия": entry["lessontype"],
                         "Группа": entry["subgroup"],
                         "Начало": entry["starttime"],
                         "Конец": entry["endtime"],
-                        "Семестр": semester_id_mapping.get(semester)
+                        "Семестр": semester_id_mapping.get(semester),
+                        "Файл": replace_slash(param_search)
                     }
                     processed_data.append(processed_entry)
+                    print(processed_entry)
 
                 # Вывести данные в консоль
                 for entry in processed_data:
                     print(json.dumps(entry, indent=4, ensure_ascii=False))
-                    print()
 
                 # Сохранить данные в JSON файл
-                if teacher:
-                    output_json_file = f"schedule_{semester}_{teacher}.json"
-                else:
-                    output_json_file = f"schedule_{semester}_{institute}_{speciality}_{group}.json"
-                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4,
                               ensure_ascii=False)
@@ -88,6 +93,28 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                 # Преобразование данных в формат JSON
                 processed_data = []
                 first_row_skipped = False  # Флаг для пропуска первой строки данных
+                semester_param = normalize_table_name(normalize_parameter(str(semester)))
+                institute_param = normalize_parameter(institute) if institute else None
+                speciality_param = normalize_parameter(speciality) if speciality else None
+                group_param = normalize_parameter(group) if group else None
+                teacher_param = normalize_table_name(teacher if teacher else "")
+
+                print(semester_param)
+                print(institute)
+                print(speciality)
+                print(group)
+                output_json_file = f"schedule_{semester_param}__"
+                if teacher and institute is None:
+                    output_json_file += f"{teacher_param}.json"
+                    output_json_file = shorten_filename(output_json_file)
+                    param_search = f"schedule_{semester}||{teacher}"
+                else:
+                    institute_name = normalize_table_name(institute) if institute else ""
+                    speciality_name = normalize_table_name(speciality) if speciality else ""
+                    group_name = normalize_table_name(group) if group else ""
+                    output_json_file += f"{institute_name}__{speciality_name}__{group_name}.json"
+                    output_json_file = shorten_filename(output_json_file)
+                    param_search = f"schedule_{semester}||{institute}||{speciality}||{group}"
                 for row in data_rows:
                     if not first_row_skipped:
                         first_row_skipped = True
@@ -112,10 +139,11 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                         subject_parts = subject_and_teacher.split("<br />")
 
                         # Извлечение данных
-                        subject = subject_parts[0].replace("<b>", "").replace("</b>", "").strip()
-                        audience_raw = subject_parts[-1].strip() if len(subject_parts) > 1 else ""
-                        teacher = subject_parts[-2].strip() if len(subject_parts) > 2 else ""
+                        subject_2 = subject_parts[0].replace("<b>", "").replace("</b>", "").strip()
+                        group_raw = subject_parts[-1].strip() if len(subject_parts) > 1 else ""
+                        audi_2 = subject_parts[-2].strip() if len(subject_parts) > 2 else ""
                         lesson_type_raw = subject_parts[-3].strip() if len(subject_parts) > 3 else ""
+                        teacher_param = normalize_table_name(teacher if teacher else "")
 
                         lesson_type = lesson_type_raw.replace("<sup><i>", "").replace("</i></sup>", "")
 
@@ -123,26 +151,26 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                             "День недели": replace_slash(day_of_week).replace("/>", ""),
                             "Дата": replace_slash(date).replace("<br", ""),
                             "Время": replace_slash(time).replace("<br", "").replace("/>", "- "),
-                            "Название предмета": replace_slash(subject),
-                            "Аудитория": replace_slash(audience_raw),
-                            "ФИО преподавателя": replace_slash(teacher),
+                            "Название предмета": replace_slash(subject_2),
+                            "Группа": replace_slash(group_raw),
+                            "Аудитория": replace_slash(audi_2),
                             "Тип занятия": replace_slash(lesson_type),
-                            "Семестр": semester_id_mapping.get(semester)
+                            "Семестр": semester_id_mapping.get(semester),
+                            "Файл": replace_slash(to_unicode_escape(param_search))
                         }
-
-                        processed_data.append(processed_row)
+                        if processed_row is not None:
+                            processed_data.append(processed_row)
+                            #print(f"processed_data: {processed_row}")
                     else:
                         print("Неправильный формат данных:", row)
 
                 processed_data = decode_special_chars(processed_data)
-                # Сохранение обработанных данных в JSON файл
-                if teacher:
-                    output_json_file = f"schedule_{semester}_{teacher}.json"
-                else:
-                    output_json_file = f"schedule_{semester}_{institute}_{speciality}_{group}.json"
-                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
-                with open(output_json_file, "w", encoding="utf-8") as json_file:
-                    json.dump(processed_data, json_file, indent=4, ensure_ascii=False)
+                try:
+                    with open(output_json_file, "w", encoding="utf-8") as json_file:
+                        json.dump(processed_data, json_file, indent=4,
+                                  ensure_ascii=False)
+                except Exception as e:
+                    print(f"Произошла ошибка при записи данных в JSON файл: {e}")
 
                 print(f"Данные успешно обработаны и сохранены в {output_json_file}.")
                 load_data_from_json(output_json_file)
@@ -151,3 +179,4 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
         else:
             print(
                 f"Ошибка запроса для расписания. Код статуса: {response_schedule.status_code}")
+

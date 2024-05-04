@@ -71,12 +71,13 @@ def add_schedule_to_db(schedule_data, table_name):
             start_time = entry.get('Начало', '')
             end_time = entry.get('Конец', '')
             semester = entry.get('Семестр', '')
+            file = entry.get('Файл', '')
 
             cursor.execute(f'''
-                INSERT INTO {table_name} (day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO {table_name} (day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester
+                day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file
             ))
 
         conn.commit()

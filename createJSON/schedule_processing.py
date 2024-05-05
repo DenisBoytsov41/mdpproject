@@ -10,6 +10,7 @@ from db.db_operations import load_data_from_json, normalize_parameter, normalize
 def process_schedule_response(response_schedule, semester, institute=None, speciality=None, group=None, teacher=None):
     # semester_id_mapping = {1: 8, 2: 4, 3: 3, 4: 2, 5: 1}
     semester_id_mapping = {8: 1, 4: 2, 3: 3, 2: 4, 1: 5}
+    response_json = {}
 
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
@@ -63,6 +64,8 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                     }
                     processed_data.append(processed_entry)
                     print(processed_entry)
+
+                response_json = json.dumps(processed_data, indent=4, ensure_ascii=False)
 
                 # Вывести данные в консоль
                 for entry in processed_data:
@@ -165,6 +168,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                         print("Неправильный формат данных:", row)
 
                 processed_data = decode_special_chars(processed_data)
+                response_json = json.dumps(processed_data, indent=4, ensure_ascii=False)
                 try:
                     with open(output_json_file, "w", encoding="utf-8") as json_file:
                         json.dump(processed_data, json_file, indent=4,
@@ -179,4 +183,5 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
         else:
             print(
                 f"Ошибка запроса для расписания. Код статуса: {response_schedule.status_code}")
+    return response_json
 

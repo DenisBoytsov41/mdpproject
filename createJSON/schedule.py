@@ -129,7 +129,7 @@ def select_schedule(driver):
                                                     session_schedule.mount('https://', NoVerifyHTTPAdapter())
                                                     response_schedule = session_schedule.post("https://timetable.ksu.edu.ru/engine.php", data=data_schedule)
 
-                                                    process_schedule_response(response_schedule, selected_semester_id, institute=selected_institute, speciality=selected_speciality, group=selected_group)
+                                                    return process_schedule_response(response_schedule, selected_semester_id, institute=selected_institute, speciality=selected_speciality, group=selected_group)
 
                                                 else:
                                                     print("Недопустимый номер группы.")
@@ -191,7 +191,7 @@ def select_schedule(driver):
                             print("Я тут")
                             print(selected_teacher)
 
-                            process_schedule_response(response_schedule, selected_semester_id, teacher=selected_teacher)
+                            return  process_schedule_response(response_schedule, selected_semester_id, teacher=selected_teacher)
                 break
             elif user_input.lower() != 'student' and user_input.lower() != 'teacher':
                 print("Неверный ввод. Введите 'student' или 'teacher'.")

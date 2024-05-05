@@ -14,6 +14,7 @@ async def main(update, bot_context):
     try:
         driver.get("https://timetable.ksu.edu.ru/")
         bot = Bot(token=bot_context)  # Создаем объект бота здесь
+        await bot.initialize()
         schedule_json = await select_schedule(bot, driver, update)
         print(json.dumps(schedule_json))
     finally:
@@ -22,7 +23,7 @@ async def main(update, bot_context):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Недостаточно аргументов. Укажите update_data.")
+        print("Недостаточно аргументов. Укажите update_data." + len(sys.argv))
         sys.exit(1)
 
     update_data = json.loads(sys.argv[1])

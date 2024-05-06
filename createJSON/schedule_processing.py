@@ -116,6 +116,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                     speciality_name = normalize_table_name(speciality) if speciality else ""
                     group_name = normalize_table_name(group) if group else ""
                     output_json_file += f"{institute_name}__{speciality_name}__{group_name}.json"
+                    output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
                     output_json_file = shorten_filename(output_json_file)
                     param_search = f"schedule_{semester}||{institute}||{speciality}||{group}"
                 for row in data_rows:

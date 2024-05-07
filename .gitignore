@@ -1,4 +1,4 @@
-# Ignore JSON files
+# Ignore jsonAndIcal files
 *.json
 
 # Ignore TXT files

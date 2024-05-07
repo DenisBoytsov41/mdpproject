@@ -116,7 +116,7 @@ def create_event(cal, entry, start_date, end_date, week_type, end_semester, seme
 
 if __name__ == "__main__":
     Tk().withdraw()
-    file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+    file_path = filedialog.askopenfilename(filetypes=[("jsonAndIcal files", "*.json")])
 
     if file_path:
         with open(file_path, 'r', encoding='utf-8') as json_file:

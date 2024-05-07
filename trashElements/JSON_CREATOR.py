@@ -48,7 +48,7 @@ def process_schedule_response(response_schedule, semester):
             with open("../thirdElements/output_schedule.php", "r", encoding="utf-8") as file:
                 content = file.read()
 
-            # Извлечь корректный JSON из строки
+            # Извлечь корректный jsonAndIcal из строки
             start_index = content.find("[")
             end_index = content.rfind("]") + 1
             json_data = content[start_index:end_index]
@@ -93,7 +93,7 @@ def process_schedule_response(response_schedule, semester):
                 print(json.dumps(entry, indent=4, ensure_ascii=False))
                 print()
 
-            # Сохранить данные в JSON файл
+            # Сохранить данные в jsonAndIcal файл
             output_json_file = "processed_schedule_data.json"
             with open(output_json_file, "w", encoding="utf-8") as json_file:
                 json.dump(processed_data, json_file, indent=4,
@@ -120,7 +120,7 @@ def process_schedule_response(response_schedule, semester):
             # Разделить данные на строки
             data_rows = content.split("],[")
 
-            # Преобразование данных в формат JSON
+            # Преобразование данных в формат jsonAndIcal
             processed_data = []
             first_row_skipped = False  # Флаг для пропуска первой строки данных
             for row in data_rows:
@@ -170,7 +170,7 @@ def process_schedule_response(response_schedule, semester):
                     print("Неправильный формат данных:", row)
 
             processed_data = decode_special_chars(processed_data)
-            # Сохранение обработанных данных в JSON файл
+            # Сохранение обработанных данных в jsonAndIcal файл
             output_json_file = "processed_schedule_data.json"
             with open(output_json_file, "w", encoding="utf-8") as json_file:
                 json.dump(processed_data, json_file, indent=4, ensure_ascii=False)

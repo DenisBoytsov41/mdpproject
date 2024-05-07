@@ -82,9 +82,9 @@ def create_icalendar(data):
             f.write(cal.to_ical())
 
 if __name__ == "__main__":
-    # Загружаем данные из JSON файла
+    # Загружаем данные из jsonAndIcal файла
     Tk().withdraw()  # Отключаем основное окно Tkinter
-    file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+    file_path = filedialog.askopenfilename(filetypes=[("jsonAndIcal files", "*.json")])
 
     if file_path:
         with open(file_path, 'r', encoding='utf-8') as json_file:

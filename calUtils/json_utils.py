@@ -9,5 +9,5 @@ def read_json_file(file_path):
         print("Файл не найден!")
         return None
     except json.JSONDecodeError:
-        print("Ошибка при чтении JSON файла!")
+        print("Ошибка при чтении jsonAndIcal файла!")
         return None

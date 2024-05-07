@@ -47,14 +47,20 @@ def adjust_dates_based_on_week_type(start_date, end_date, type_weekStart, week_t
         end_date += timedelta(days=7)
     return start_date, end_date
 
-def save_calendar(cal, output_json_file):
-    directory = os.path.join(os.path.dirname(output_json_file), "ICAL")
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    filename = os.path.splitext(os.path.basename(output_json_file))[0] + ".ics"
-    file_path = os.path.join(directory, filename)
-    with open(file_path, 'wb') as f:
-        f.write(cal.to_ical())
+def save_calendar(cal, output_json_file = None):
+    if output_json_file is not None:
+        directory = os.path.join(os.path.dirname(output_json_file), "ICAL")
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        filename = os.path.splitext(os.path.basename(output_json_file))[0] + ".ics"
+        file_path = os.path.join(directory, filename)
+        with open(file_path, 'wb') as f:
+            f.write(cal.to_ical())
+    else:
+        file_path = filedialog.asksaveasfilename(defaultextension=".ics", filetypes=[("iCalendar files", "*.ics")])
+        if file_path:
+            with open(file_path, 'wb') as f:
+                f.write(cal.to_ical())
 
 def add_semester_holidays(holidays_json, semester_start, semester_end):
     semester_holidays = {}

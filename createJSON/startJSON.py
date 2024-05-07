@@ -17,8 +17,7 @@ async def main(update, bot_context):
         bot = Bot(token=bot_context)
         await bot.initialize()
         schedule_json, output_json_file = await select_schedule(bot, driver, update)
-        print(json.dumps(schedule_json))
-        subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file, schedule_json], check=True)
+        subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file], check=True)
     finally:
         driver.quit()
 

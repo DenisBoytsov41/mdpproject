@@ -24,5 +24,5 @@ url = "https://calendar.google.com/calendar/ical/ru.russian%23holiday%40group.v.
 
 holidays_json = extract_holidays(url)
 
-print("Праздники извлечены в формате JSON:")
+print("Праздники извлечены в формате jsonAndIcal:")
 print(holidays_json)

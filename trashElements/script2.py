@@ -187,9 +187,9 @@ try:
                         try:
                             json_response_group = response_group.json()
                             print("Успешный запрос для группы!")
-                            print(json_response_group)  # Вывести ответ в формате JSON
+                            print(json_response_group)  # Вывести ответ в формате jsonAndIcal
                         except requests.exceptions.JSONDecodeError:
-                            print("Ошибка декодирования JSON или пустой ответ сервера для группы.")
+                            print("Ошибка декодирования jsonAndIcal или пустой ответ сервера для группы.")
                     else:
                         print(f"Ошибка запроса для группы. Код статуса: {response_group.status_code}")
                         print(response_group.text)  # Вывести текст ошибки, если есть

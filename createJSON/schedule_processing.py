@@ -3,7 +3,7 @@ import csv
 import html
 import json
 from utils import replace_slash, decode_special_chars, NoVerifyHTTPAdapter, shorten_filename, to_unicode_escape
-from config import DB_DIR, CREATE_JSON_DIR
+from config import DB_DIR, CREATE_JSON_DIR,CREATE_JSON_DIR_JSON
 from db.db_operations import load_data_from_json, normalize_parameter, normalize_table_name
 
 
@@ -16,7 +16,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
             try:
-                # Извлечь корректный JSON из строки
+                # Извлечь корректный jsonAndIcal из строки
                 start_index = response_schedule.text.find("[")
                 end_index = response_schedule.text.rfind("]") + 1
                 json_data = response_schedule.text[start_index:end_index]
@@ -43,7 +43,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                 else:
                     output_json_file = f"schedule_{semester}__{normalize_table_name(institute)}__{normalize_table_name(speciality)}__{normalize_table_name(group)}.json"
                     param_search = f"schedule_{semester}||{institute}||{speciality}||{group}"
-                output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
+                output_json_file = os.path.join(CREATE_JSON_DIR_JSON, output_json_file)
                 output_json_file = shorten_filename(output_json_file)
 
                 # Преобразовать данные
@@ -72,7 +72,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                 for entry in processed_data:
                     print(json.dumps(entry, indent=4, ensure_ascii=False))
 
-                # Сохранить данные в JSON файл
+                # Сохранить данные в jsonAndIcal файл
                 with open(output_json_file, "w", encoding="utf-8") as json_file:
                     json.dump(processed_data, json_file, indent=4,
                               ensure_ascii=False)
@@ -94,7 +94,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                 # Разделить данные на строки
                 data_rows = content.split("],[")
 
-                # Преобразование данных в формат JSON
+                # Преобразование данных в формат jsonAndIcal
                 processed_data = []
                 first_row_skipped = False  # Флаг для пропуска первой строки данных
                 semester_param = normalize_table_name(normalize_parameter(str(semester)))
@@ -117,7 +117,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                     speciality_name = normalize_table_name(speciality) if speciality else ""
                     group_name = normalize_table_name(group) if group else ""
                     output_json_file += f"{institute_name}__{speciality_name}__{group_name}.json"
-                    output_json_file = os.path.join(CREATE_JSON_DIR, output_json_file)
+                    output_json_file = os.path.join(CREATE_JSON_DIR_JSON, output_json_file)
                     output_json_file = shorten_filename(output_json_file)
                     param_search = f"schedule_{semester}||{institute}||{speciality}||{group}"
                 for row in data_rows:

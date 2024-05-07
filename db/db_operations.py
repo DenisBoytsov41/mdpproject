@@ -38,27 +38,33 @@ def add_schedule_to_db(schedule_data, table_name):
         conn = connect_to_db()
         cursor = conn.cursor()
 
-        cursor.execute(f'''
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                day_of_week TEXT NOT NULL,
-                date TEXT,
-                time TEXT NOT NULL,
-                week_type TEXT NOT NULL,
-                subject TEXT NOT NULL,
-                classroom TEXT,
-                teacher TEXT,
-                lesson_type TEXT,
-                group_name TEXT,
-                start_time TEXT,
-                end_time TEXT,
-                semester INTEGER NOT NULL,
-                file TEXT
-            )
-        ''')
+        # Проверяем существование таблицы
+        cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'")
+        existing_table = cursor.fetchone()
 
-        for entry in schedule_data:
-            # Проверка наличия ключей в записи расписания
+        if not existing_table:
+            # Если таблицы нет, создаем её
+            cursor.execute(f'''
+                CREATE TABLE {table_name} (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    day_of_week TEXT NOT NULL,
+                    date TEXT,
+                    time TEXT NOT NULL,
+                    week_type TEXT NOT NULL,
+                    subject TEXT NOT NULL,
+                    classroom TEXT,
+                    teacher TEXT,
+                    lesson_type TEXT,
+                    group_name TEXT,
+                    start_time TEXT,
+                    end_time TEXT,
+                    semester INTEGER NOT NULL,
+                    file TEXT
+                )
+            ''')
+
+        for idx, entry in enumerate(schedule_data, start=1):
+            # Вставляем данные с указанием id
             day_of_week = entry.get('День недели', '')
             date = entry.get('Дата', '')
             time = entry.get('Время', '')
@@ -74,10 +80,10 @@ def add_schedule_to_db(schedule_data, table_name):
             file = entry.get('Файл', '')
 
             cursor.execute(f'''
-                INSERT INTO {table_name} (day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                REPLACE INTO {table_name} (id, day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
-                day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file
+                idx, day_of_week, date, time, week_type, subject, classroom, teacher, lesson_type, group_name, start_time, end_time, semester, file
             ))
 
         conn.commit()
@@ -112,21 +118,21 @@ def extract_data_format1_from_db(table_name):
         for row in cursor.fetchall():
             entry = {
                 "День недели": row[1],
-                "Время": row[2],
-                "Тип недели": row[3],
-                "Название предмета": row[4],
-                "Аудитория": row[5],
-                "ФИО преподавателя": row[6],
-                "Тип занятия": row[7],
-                "Группа": row[8],
-                "Начало": row[9],
-                "Конец": row[10],
-                "Семестр": row[11],
-                "Файл": row[12]
+                "Время": row[3],
+                "Тип недели": row[4],
+                "Название предмета": row[5],
+                "Аудитория": row[6],
+                "ФИО преподавателя": row[7],
+                "Тип занятия": row[8],
+                "Группа": row[9],
+                "Начало": row[10],
+                "Конец": row[11],
+                "Семестр": row[12],
+                "Файл": row[13]
             }
             data.append(entry)
 
-        return convert_data_to_json(data)
+        return data
     except sqlite3.Error as e:
         print(f"Произошла ошибка при извлечении данных из БД: {e}")
         return None
@@ -148,16 +154,16 @@ def extract_data_format2_from_db(table_name):
                 "День недели": row[1],
                 "Дата": row[2],
                 "Время": row[3],
-                "Название предмета": row[4],
+                "Название предмета": row[5],
                 "Группа": row[9],
-                "Аудитория": row[5],
-                "Тип занятия": row[7],
-                "Семестр": row[11],
-                "Файл": row[12]
+                "Аудитория": row[6],
+                "Тип занятия": row[8],
+                "Семестр": row[12],
+                "Файл": row[13]
             }
             data.append(entry)
 
-        return convert_data_to_json(data)
+        return data
     except sqlite3.Error as e:
         print(f"Произошла ошибка при извлечении данных из БД: {e}")
         return None

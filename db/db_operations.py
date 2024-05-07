@@ -99,3 +99,76 @@ def load_data_from_json(json_file_path):
     except Exception as e:
         print(f"Произошла ошибка при загрузке данных из JSON файла: {e}")
 
+def extract_data_format1_from_db(table_name):
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        cursor.execute(f'''
+            SELECT * FROM {table_name}
+        ''')
+
+        data = []
+        for row in cursor.fetchall():
+            entry = {
+                "День недели": row[1],
+                "Время": row[2],
+                "Тип недели": row[3],
+                "Название предмета": row[4],
+                "Аудитория": row[5],
+                "ФИО преподавателя": row[6],
+                "Тип занятия": row[7],
+                "Группа": row[8],
+                "Начало": row[9],
+                "Конец": row[10],
+                "Семестр": row[11],
+                "Файл": row[12]
+            }
+            data.append(entry)
+
+        return convert_data_to_json(data)
+    except sqlite3.Error as e:
+        print(f"Произошла ошибка при извлечении данных из БД: {e}")
+        return None
+    finally:
+        conn.close()
+
+def extract_data_format2_from_db(table_name):
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        cursor.execute(f'''
+            SELECT * FROM {table_name}
+        ''')
+
+        data = []
+        for row in cursor.fetchall():
+            entry = {
+                "День недели": row[1],
+                "Дата": row[2],
+                "Время": row[3],
+                "Название предмета": row[4],
+                "Группа": row[9],
+                "Аудитория": row[5],
+                "Тип занятия": row[7],
+                "Семестр": row[11],
+                "Файл": row[12]
+            }
+            data.append(entry)
+
+        return convert_data_to_json(data)
+    except sqlite3.Error as e:
+        print(f"Произошла ошибка при извлечении данных из БД: {e}")
+        return None
+    finally:
+        conn.close()
+
+def convert_data_to_json(data):
+    try:
+        json_data = json.dumps(data, ensure_ascii=False, indent=4)
+        return json_data
+    except Exception as e:
+        print(f"Произошла ошибка при преобразовании данных в JSON: {e}")
+        return None
+

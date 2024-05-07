@@ -1,7 +1,6 @@
 import json
 import locale
 import sys
-
 from calendar_utils import create_icalendar, create_event
 from json_utils import read_json_file
 from gui_utils import get_file_path

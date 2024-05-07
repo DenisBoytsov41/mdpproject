@@ -11,6 +11,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
     # semester_id_mapping = {1: 8, 2: 4, 3: 3, 4: 2, 5: 1}
     semester_id_mapping = {8: 1, 4: 2, 3: 3, 2: 4, 1: 5}
     response_json = {}
+    output_json_file = ""
 
     if semester in semester_id_mapping and semester not in [1, 2, 8]:
         if response_schedule.status_code == 200:
@@ -184,5 +185,5 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
         else:
             print(
                 f"Ошибка запроса для расписания. Код статуса: {response_schedule.status_code}")
-    return response_json
+    return response_json, output_json_file
 

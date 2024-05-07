@@ -181,9 +181,9 @@ def create_icalendar(data):
 def create_event(cal, entry, start_date, end_date, week_type, end_semester, semester):
     event = Event()
     if semester != 2 and semester != 3:
-        description = f'{entry["Тип занятия"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}'
+        description = f'{entry["Тип занятия"]} \nПреподаватель/Группа: {entry["Группа"]}\nАудитория: {entry["Аудитория"]}'
     else:
-        description = f'{entry["Тип занятия:"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}'
+        description = f'{entry["Тип занятия"]} \nПреподаватель/Группа: {entry["ФИО преподавателя"]}\nАудитория: {entry["Аудитория"]}'
 
     if entry.get("Группа"):
         description += f'\nГруппа: {entry["Группа"]}'
@@ -212,7 +212,7 @@ def create_event(cal, entry, start_date, end_date, week_type, end_semester, seme
         event.add('rrule', rule)
 
     # Проверяем, что end_semester больше start_date
-    if end_semester is not None and end_semester > start_date:
+    if (end_semester is not None and end_semester > start_date) or end_semester is None:
         event.add('dtstart', start_date + timedelta(hours=start_time.hour, minutes=start_time.minute))
         event.add('dtend', end_date + timedelta(hours=end_time.hour, minutes=end_time.minute))
         event.add('summary', f'{entry["Название предмета"]} ({week_type})' if week_type else entry["Название предмета"])

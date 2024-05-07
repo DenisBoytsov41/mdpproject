@@ -7,7 +7,7 @@ from semester_utils import (get_current_week_type, get_current_semester_start,
                             get_current_semester_end, adjust_dates_based_on_week_type, save_calendar, add_semester_holidays)
 from APIelements.holiday_or_weekend import extract_holidays
 
-def create_icalendar(data):
+def create_icalendar(data,output_json_file):
     cal = Calendar()
     cal.add('prodid', '-//KSU//RU')
     cal.add('version', '2.0')
@@ -175,7 +175,7 @@ def create_icalendar(data):
             start_date_str = entry.get("Дата")
             start_date = datetime.strptime(start_date_str, "%Y.%m.%d")
             create_event(cal, entry, start_date, start_date, None, None, entry.get("Семестр"))
-    save_calendar(cal)
+    save_calendar(cal, output_json_file)
 
 
 def create_event(cal, entry, start_date, end_date, week_type, end_semester, semester):

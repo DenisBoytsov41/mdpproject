@@ -1,32 +1,47 @@
 import os
-import tkinter as tk
-from tkinter import filedialog
+import sys
+import webbrowser
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from icalendar import Calendar
 from datetime import datetime, timedelta
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+CLIENT_SECRETS_FILE = 'credentials.json'
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+REDIRECT_URI = 'http://localhost:8080/'
+PORT = 8080
 
 def authenticate_google_calendar():
-    SCOPES = ['https://www.googleapis.com/auth/calendar']
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, scopes=SCOPES, redirect_uri=REDIRECT_URI)
+    credentials = flow.run_local_server()
 
-    creds = None
+    service = build('calendar', 'v3', credentials=credentials)
 
-    if os.path.exists('token.json'):
-        os.remove('token.json')
+    return service
 
-    flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-    creds = flow.run_local_server(port=0)
+class OAuthCallbackHandler(BaseHTTPRequestHandler):
+    authorization_code = None
 
-    return build('calendar', 'v3', credentials=creds)
+    def do_GET(self):
+        parsed_path = urlparse(self.path)
+        if parsed_path.path == '/oauth2callback':
+            query = parse_qs(parsed_path.query)
+            OAuthCallbackHandler.authorization_code = query['code'][0]
 
-def choose_ics_file():
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename(filetypes=[("iCalendar files", "*.ics")])
-    return file_path
-
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'<html><head><title>Authentication Successful</title></head>')
+            self.wfile.write(b'<body><p>Authentication successful! You can close this window now.</p></body></html>')
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Not found')
 def add_events_to_google_calendar(service, ics_file_path):
     with open(ics_file_path, 'rb') as f:
         calendar = Calendar.from_ical(f.read())
@@ -59,11 +74,18 @@ def add_events_to_google_calendar(service, ics_file_path):
     print("События успешно добавлены в новый календарь Google.")
 
 def main():
-    ics_file_path = choose_ics_file()
-    if ics_file_path:
+    subprocess_ics_file_path = sys.argv[1] if len(sys.argv) > 1 else None
+    if subprocess_ics_file_path:
+        ics_file_path = subprocess_ics_file_path
+    else:
+        ics_file_path = input("Введите путь к файлу .ics: ")
+
+    if os.path.exists(ics_file_path):
         service = authenticate_google_calendar()
         add_events_to_google_calendar(service, ics_file_path)
         print("События успешно добавлены в календарь Google.")
+    else:
+        print("Указанный файл не существует.")
 
 if __name__ == "__main__":
     main()

@@ -18,6 +18,20 @@ async def main(update, bot_context):
         await bot.initialize()
         schedule_json, output_json_file = await select_schedule(bot, driver, update)
         subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file], check=True)
+        output_dir = os.path.dirname(output_json_file)
+        ical_dir = os.path.join(output_dir, "ICAL")
+
+        json_file_name = os.path.basename(output_json_file)
+        json_file_prefix = os.path.splitext(json_file_name)[0]
+
+        ics_files = [f for f in os.listdir(ical_dir) if f.startswith(json_file_prefix) and f.endswith(".ics")]
+
+        if ics_files:
+            ics_file_path = os.path.join(ical_dir, ics_files[0])
+            subprocess.run([PYTHON_EXE, GOOGLE_CAL, ics_file_path], check=True)
+        else:
+            print("Нет файлов формата .ics в папке ICAL.")
+
     finally:
         driver.quit()
 

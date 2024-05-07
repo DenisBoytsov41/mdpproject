@@ -10,6 +10,7 @@ CAL_UTILS_DIR = os.path.join(BASE_DIR, "calUtils")
 START_CREATE_CAL_SCRIPT = os.path.join(CAL_UTILS_DIR, "startCreateCAL.py")
 START_CREATE_JSON_SCRIPT = os.path.join(CREATE_JSON_DIR, "startJSON.py")
 START_ALL_SCRIPT = os.path.join(BASE_DIR, "scriptStart.py")
+GOOGLE_CAL = os.path.join(BASE_DIR, "add_events_from_ics_to_google_calendar.py")
 TELEGRAM_API_TOKEN = "6918298485:AAG9b4gwPkIQvt1_9A3LOnFl2gMrDk3H5zw"
 
 

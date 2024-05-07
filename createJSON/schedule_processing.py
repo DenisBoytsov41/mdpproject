@@ -110,6 +110,7 @@ def process_schedule_response(response_schedule, semester, institute=None, speci
                 output_json_file = f"schedule_{semester_param}__"
                 if teacher and institute is None:
                     output_json_file += f"{teacher_param}.json"
+                    output_json_file = os.path.join(CREATE_JSON_DIR_JSON, output_json_file)
                     output_json_file = shorten_filename(output_json_file)
                     param_search = f"schedule_{semester}||{teacher}"
                 else:

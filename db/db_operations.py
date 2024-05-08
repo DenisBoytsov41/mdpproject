@@ -7,6 +7,79 @@ from config import DB_DIR
 def connect_to_db():
     db_path = os.path.join(DB_DIR, 'schedule.db')
     return sqlite3.connect(db_path)
+
+def create_users_tables_table():
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        # Проверяем существование таблицы
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users_tables'")
+        existing_table = cursor.fetchone()
+
+        if not existing_table:
+            # Если таблицы нет, создаем её
+            cursor.execute('''
+                CREATE TABLE users_tables (
+                    user_id INTEGER PRIMARY KEY,
+                    table_names TEXT
+                )
+            ''')
+
+        conn.commit()
+        print("Таблица users_tables успешно создана.")
+    except Exception as e:
+        print(f"Произошла ошибка при создании таблицы users_tables: {e}")
+    finally:
+        conn.close()
+
+def drop_users_tables_table():
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users_tables'")
+        existing_table = cursor.fetchone()
+
+        if existing_table:
+            cursor.execute('''DROP TABLE users_tables''')
+            conn.commit()
+            print("Таблица users_tables успешно удалена.")
+        else:
+            print("Таблицы users_tables не существует.")
+    except Exception as e:
+        print(f"Произошла ошибка при удалении таблицы users_tables: {e}")
+    finally:
+        conn.close()
+
+def add_user_table_entry(user_id, table_name):
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        # Получаем текущие названия таблиц для данного пользователя
+        cursor.execute("SELECT table_names FROM users_tables WHERE user_id=?", (user_id,))
+        user_tables_entry = cursor.fetchone()
+
+        if user_tables_entry:
+            current_table_names = user_tables_entry[0].split(',')
+            if table_name not in current_table_names:
+                current_table_names.append(table_name)
+                updated_table_names = ','.join(current_table_names)
+                cursor.execute("UPDATE users_tables SET table_names=? WHERE user_id=?", (updated_table_names, user_id))
+                print(f"Добавлено новое название таблицы для пользователя {user_id}: {table_name}")
+            else:
+                print(f"Название таблицы {table_name} уже существует для пользователя {user_id}")
+        else:
+            # Если записи о пользователе нет, создаем новую
+            cursor.execute("INSERT INTO users_tables (user_id, table_names) VALUES (?, ?)", (user_id, table_name))
+            print(f"Добавлена новая запись в таблицу users_tables: user_id={user_id}, table_name={table_name}")
+
+        conn.commit()
+    except Exception as e:
+        print(f"Произошла ошибка при добавлении записи в таблицу users_tables: {e}")
+    finally:
+        conn.close()
 def normalize_parameter(param):
     try:
         current_encoding = getattr(param, 'encoding', None)

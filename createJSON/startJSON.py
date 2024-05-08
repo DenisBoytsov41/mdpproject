@@ -8,6 +8,7 @@ from schedule import select_schedule
 from telegram import Bot
 from config import *
 from telegram_utils import send_telegram_message, get_telegram_input
+from db.db_operations import create_users_tables_table, add_user_table_entry
 
 
 async def main(update, bot_context):
@@ -28,9 +29,18 @@ async def main(update, bot_context):
 
         if ics_files:
             ics_file_path = os.path.join(ical_dir, ics_files[0])
-            subprocess.run([PYTHON_EXE, GOOGLE_CAL, ics_file_path], check=True)
+            update_data_str = json.dumps(update_data)
+            subprocess.run([PYTHON_EXE, GOOGLE_CAL, ics_file_path, update_data_str, bot_context], check=True)
+            create_users_tables_table()
+            table_name = os.path.splitext(os.path.basename(ics_file_path))[0]
+            if table_name:
+                add_user_table_entry(update.effective_user.id, table_name)
         else:
-            print("Нет файлов формата .ics в папке ICAL.")
+            await send_telegram_message(update, "Нет файлов формата .ics в папке ICAL.")
+
+    except Exception as e:
+        error_message = "Произошла ошибка при выполнении команды."
+        await send_telegram_message(update, error_message)
 
     finally:
         driver.quit()

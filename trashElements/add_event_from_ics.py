@@ -5,7 +5,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from icalendar import Calendar
 
-CLIENT_SECRETS_FILE = 'credentials.json'
+CLIENT_SECRETS_FILE = '../credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 REDIRECT_URI = 'http://localhost:8080/'
 

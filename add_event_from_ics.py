@@ -1,39 +1,13 @@
 import os
 import sys
-import webbrowser
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from icalendar import Calendar
-from datetime import datetime, timedelta
 
 CLIENT_SECRETS_FILE = 'credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 REDIRECT_URI = 'http://localhost:8080/'
-PORT = 8080
-
-class OAuthCallbackHandler(BaseHTTPRequestHandler):
-    authorization_code = None
-
-    def do_GET(self):
-        parsed_path = urlparse(self.path)
-        query = parse_qs(parsed_path.query)
-        if 'code' in query:
-            OAuthCallbackHandler.authorization_code = query['code'][0]
-
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(b'<html><head><title>Authentication Successful</title></head>')
-            self.wfile.write(b'<body><p>Authentication successful! You can close this window now.</p></body></html>')
-        else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b'Not found')
-
 
 def add_events_to_google_calendar(service, ics_file_path):
     with open(ics_file_path, 'rb') as f:
@@ -60,7 +34,7 @@ def add_events_to_google_calendar(service, ics_file_path):
         event_body = {
             'summary': event_summary,
             'description': event_description,
-            'location': event_location,  # Включение атрибута LOCATION в тело запроса
+            'location': event_location,
             'start': {'dateTime': event_start},
             'end': {'dateTime': event_end}
         }
@@ -79,33 +53,13 @@ def authenticate_google_calendar():
 
     print("Пожалуйста, авторизуйтесь по следующей ссылке:")
     print(authorization_url)
-    webbrowser.open(authorization_url)
 
-    httpd = HTTPServer(('localhost', PORT), OAuthCallbackHandler)
-    print(f"Сервер запущен на порту {PORT}")
-
-    try:
-        httpd.handle_request()
-    except KeyboardInterrupt:
-        pass
-
-    if OAuthCallbackHandler.authorization_code:
-        # Получаем объект Credentials из токена
-        credentials = flow.fetch_token(code=OAuthCallbackHandler.authorization_code)
-        # Создаем объект Credentials
-        creds = Credentials(
-            token=credentials['access_token'],
-            refresh_token=credentials['refresh_token'],
-            token_uri=flow.client_config['token_uri'],
-            client_id=flow.client_config['client_id'],
-            client_secret=flow.client_config['client_secret'],
-            scopes=SCOPES
-        )
-        # Создаем объект сервиса Google Календаря
-        service = build('calendar', 'v3', credentials=creds)
+    if input("Введите полученный код авторизации: "):
+        credentials = flow.run_local_server()
+        service = build('calendar', 'v3', credentials=credentials)
         return service
     else:
-        print("Авторизация не удалась. Попробуйте еще раз.")
+        print("Не удалось выполнить аутентификацию.")
         return None
 
 def main():
@@ -123,7 +77,6 @@ def main():
             print("События успешно добавлены в календарь Google.")
         else:
             print("Не удалось выполнить аутентификацию.")
-
     else:
         print("Указанный файл не существует.")
 

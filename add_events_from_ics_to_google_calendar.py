@@ -29,9 +29,10 @@ from urllib.parse import urlparse, parse_qs
 
 CLIENT_SECRETS_FILE = 'credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-REDIRECT_URI = 'http://localhost:8080/'
+REDIRECT_URI = 'https://localhost:8080/'
 PORT = 8080
 authorization_response = None
+server_should_shutdown = False  # Флаг для определения, нужно ли остановить сервер
 
 async def send_telegram_message(bot, chat_id, messages):
     max_message_length = 4096
@@ -97,6 +98,8 @@ def add_events_to_google_calendar(service, ics_file_path):
             service.events().insert(calendarId=calendar_id, body=event_body).execute()
 
     print("События успешно добавлены в новый календарь Google.")
+    global server_should_shutdown
+    server_should_shutdown = True  # Установка флага для остановки сервера
 
 async def authenticate_google_calendar():
     flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES, redirect_uri=REDIRECT_URI)
@@ -129,6 +132,9 @@ class OAuthCallbackHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'<html><head><title>Authentication Successful</title></head>')
             self.wfile.write(b'<body><p>Authentication successful! You can close this window now.</p></body></html>')
+            global server_should_shutdown
+            if server_should_shutdown:
+                self.server.shutdown()
         else:
             self.send_response(404)
             self.end_headers()
@@ -149,8 +155,8 @@ def start_local_server():
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
     print(f"Сервер запущен на порту {PORT}")
     try:
-        # httpd.serve_forever()
-        httpd.handle_request()
+        httpd.serve_forever()
+        #httpd.handle_request()
     except KeyboardInterrupt:
         pass
 

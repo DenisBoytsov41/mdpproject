@@ -1,18 +1,13 @@
 import asyncio
 import http
 import os
-import socketserver
-import ssl
 import ssl as ssllib
-import sys
 import threading
 import urllib
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
-from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 from icalendar import Calendar
 from datetime import datetime, timedelta
@@ -22,9 +17,15 @@ from telegram import Update
 import json
 import asyncio
 import http.server
-import socketserver
+import asyncio
+import http.server
+import socket
+import ssl
+import sys
 import urllib.parse
-from ssl import SSLContext
+from config import *
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
 
 CLIENT_SECRETS_FILE = 'credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -114,28 +115,44 @@ async def authenticate_google_calendar():
 
     return service
 
-class MyHandler(http.server.SimpleHTTPRequestHandler):
+class OAuthCallbackHandler(BaseHTTPRequestHandler):
+    authorization_code = None
+
     def do_GET(self):
-        global authorization_response
-        query = urllib.parse.urlparse(self.path).query
-        params = urllib.parse.parse_qs(query)
-        authorization_response = params.get('code', [''])[0]
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-        self.wfile.write(b'<html><body>Authorization successful. You can close this tab now.</body></html>')
-def get_ssl_context(certfile, keyfile):
-    context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
-    context.load_cert_chain(certfile, keyfile)
-    context.set_ciphers("@SECLEVEL=1:ALL")
-    return context
+        parsed_path = urlparse(self.path)
+        query = parse_qs(parsed_path.query)
+        if 'code' in query:
+            OAuthCallbackHandler.authorization_code = query['code'][0]
+
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(b'<html><head><title>Authentication Successful</title></head>')
+            self.wfile.write(b'<body><p>Authentication successful! You can close this window now.</p></body></html>')
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Not found')
+
+def is_port_in_use(port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('localhost', port)) == 0
 def start_local_server():
+    if is_port_in_use(PORT):
+        print(f"Порт {PORT} уже используется. Выберите другой порт или остановите процесс, который его занимает.")
+        return
+
     server_address = ('localhost', PORT)
-    httpd = http.server.HTTPServer(server_address, MyHandler)
-    context = get_ssl_context("cert.pem", "key.pem")
+    httpd = http.server.HTTPServer(server_address, OAuthCallbackHandler)
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain(certfile=CERT_SEL, keyfile=KEY_SEL)
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-    print(f"Local server started at port {PORT}")
-    httpd.serve_forever()
+    print(f"Сервер запущен на порту {PORT}")
+    try:
+        # httpd.serve_forever()
+        httpd.handle_request()
+    except KeyboardInterrupt:
+        pass
 
 
 async def main():

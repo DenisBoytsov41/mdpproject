@@ -12,6 +12,8 @@ START_CREATE_JSON_SCRIPT = os.path.join(CREATE_JSON_DIR, "startJSON.py")
 START_ALL_SCRIPT = os.path.join(BASE_DIR, "scriptStart.py")
 GOOGLE_CAL = os.path.join(BASE_DIR, "add_events_from_ics_to_google_calendar.py")
 TELEGRAM_API_TOKEN = "6918298485:AAG9b4gwPkIQvt1_9A3LOnFl2gMrDk3H5zw"
+CERT_SEL = os.path.join(BASE_DIR, "server.pem")
+KEY_SEL = os.path.join(BASE_DIR, "server.key")
 
 
 OUTPUT_SCHEDULE_FILE = os.path.join(THIRD_ELEMENTS_DIR, "output_schedule.php")

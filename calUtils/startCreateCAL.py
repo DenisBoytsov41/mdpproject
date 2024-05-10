@@ -1,19 +1,31 @@
 import json
 import locale
 import sys
-
+import os.path
 from calendar_utils import create_icalendar, create_event
-from json_utils import read_json_file
-from gui_utils import get_file_path
-
+from db.db_operations import extract_data_format1_from_db, extract_data_format2_from_db
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
-if __name__ == "__main__":
-    file_path = get_file_path()
-    #schedule_json = json.loads(sys.argv[1])
+def extract_data_from_db(output_json_file):
+    table_name = os.path.splitext(os.path.basename(output_json_file))[0]
+    if "schedule_4_" in table_name or "schedule_3_" in table_name:
+        return extract_data_format1_from_db(table_name)
+    else:
+        return extract_data_format2_from_db(table_name)
 
-    if file_path:
-        data = read_json_file(file_path)
-        if data:
-            create_icalendar(data)
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Недостаточно аргументов. Укажите output_json_file.")
+        sys.exit(1)
+
+    output_json_file = sys.argv[1]
+    try:
+        with open(output_json_file, 'r', encoding='utf-8') as file:
+            schedule_json = file.read()
+            data = json.loads(schedule_json)
+    except FileNotFoundError:
+        print(f"Файл {output_json_file} не найден. Извлечение данных из БД.")
+        data = extract_data_from_db(output_json_file)
+
+    create_icalendar(data, output_json_file)

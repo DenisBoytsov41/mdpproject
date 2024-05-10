@@ -80,7 +80,7 @@ try:
         # Обработка ответа сервера при открытии
         if response_open.status_code == 200:
             print("Успешный запрос при открытии!")
-            # Если ответ сервера не является JSON, значит, переходим к следующему этапу
+            # Если ответ сервера не является jsonAndIcal, значит, переходим к следующему этапу
             if not response_open.headers['content-type'].lower().startswith('application/json'):
                 # Ждем, пока список институтов будет доступен в DOM
                 select_element_institute = WebDriverWait(driver, 10).until(

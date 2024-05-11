@@ -93,19 +93,15 @@ def add_events_to_google_calendar(service, ics_file_path):
     global server_should_shutdown
     server_should_shutdown = True  # Установка флага для остановки сервера
 
-async def authenticate_google_calendar(ngrok_tunnel_url):
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES, redirect_uri=ngrok_tunnel_url)
+async def authenticate_google_calendar():
+    global authorization_response
+    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES, redirect_uri=REDIRECT_URI)
     authorization_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
 
     webbrowser.open(authorization_url)
 
     local_server_thread = threading.Thread(target=start_local_server)
-    ngrok_thread = threading.Thread(target=start_ngrok)
     local_server_thread.start()
-    ngrok_thread.start()
-
-    ngrok_thread.join()
-
     while not authorization_response:
         await asyncio.sleep(1)
 
@@ -114,7 +110,6 @@ async def authenticate_google_calendar(ngrok_tunnel_url):
     service = build('calendar', 'v3', credentials=flow.credentials)
 
     return service
-
 class OAuthCallbackHandler(BaseHTTPRequestHandler):
     authorization_code = None
 
@@ -155,23 +150,7 @@ def start_local_server():
     except KeyboardInterrupt:
         pass
 
-async def start_ngrok():
-    try:
-        tunnels = ngrok.get_tunnels()
-        for tunnel in tunnels:
-            ngrok.disconnect(tunnel.public_url)
-
-        conf.get_default().config_path = NGROK_CONFIG_PATH
-
-        ngrok_tunnel = ngrok.connect(PORT, proto='http', name='goodpromised')
-        ngrok_tunnel_url = ngrok_tunnel.public_url + '/'
-        print(f"ngrok tunnel URL: {ngrok_tunnel_url}")
-        return ngrok_tunnel_url
-    except Exception as e:
-        print(f"Ошибка при запуске ngrok: {e}")
-
 async def main():
-    global ngrok_tunnel_url
     subprocess_ics_file_path = sys.argv[1] if len(sys.argv) > 1 else None
     if subprocess_ics_file_path:
         ics_file_path = subprocess_ics_file_path
@@ -188,17 +167,13 @@ async def main():
         bot = Bot(token=bot_context)
         await bot.initialize()
     if os.path.exists(ics_file_path):
-        ngrok_tunnel_url = await start_ngrok()
-        if ngrok_tunnel_url:
-            service = await authenticate_google_calendar(ngrok_tunnel_url)
-            if service:
-                print("Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря.")
-                add_events_to_google_calendar(service, ics_file_path)
-                print("События успешно добавлены в календарь Google.")
-            else:
-                print("Не удалось выполнить аутентификацию.")
+        service = await authenticate_google_calendar()
+        if service:
+            print("Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря.")
+            add_events_to_google_calendar(service, ics_file_path)
+            print("События успешно добавлены в календарь Google.")
         else:
-            print("Не удалось запустить ngrok.")
+            print("Не удалось выполнить аутентификацию.")
     else:
         print("Указанный файл не существует.")
 

@@ -19,3 +19,4 @@ NGROK = os.path.join(BASE_DIR, "drivers", "ngrok.exe")
 NGROK_CONFIG_PATH = r'C:\Users\Home\AppData\Local\ngrok\ngrok.yml'
 OUTPUT_SCHEDULE_FILE = os.path.join(THIRD_ELEMENTS_DIR, "output_schedule.php")
 PROCESSED_SCHEDULE_DATA_FILE = os.path.join(CREATE_JSON_DIR, "processed_schedule_data.json")
+CRED_JSON = os.path.join(BASE_DIR, "credentials.json")

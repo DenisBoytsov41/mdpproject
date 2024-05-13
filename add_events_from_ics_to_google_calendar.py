@@ -2,11 +2,14 @@ import http
 import threading
 import webbrowser
 from http.server import HTTPServer, BaseHTTPRequestHandler
+import aioauth_client
+import requests
 from google_auth_oauthlib.flow import InstalledAppFlow
+from aioauth_client import GoogleClient
 from googleapiclient.discovery import build
 from icalendar import Calendar
 from datetime import datetime, timedelta
-from telegram import Bot
+from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 import re
 from telegram import Update
 import json
@@ -19,13 +22,15 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 from pyngrok import ngrok, conf
 from config import *
+import aiohttp
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 
 CLIENT_SECRETS_FILE = 'credentials.json'
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-REDIRECT_URI = 'http://localhost:8080/'
-PORT = 8080
+REDIRECT_URI = 'https://v2462318.hosted-by-vdsina.ru/oauth/callback/'
 authorization_response = None
-server_should_shutdown = False
+
 
 async def send_telegram_message(bot, chat_id, messages):
     max_message_length = 4096
@@ -35,7 +40,8 @@ async def send_telegram_message(bot, chat_id, messages):
         await bot.send_message(chat_id, text=message_text)
     else:
         for i in range(0, len(message_text), max_message_length):
-            await bot.send_message(chat_id, text=message_text[i:i+max_message_length])
+            await bot.send_message(chat_id, text=message_text[i:i + max_message_length])
+
 
 def parse_rrule_string(rrule_string):
     freq_match = re.search(r"'FREQ': \['(.*?)'\]", rrule_string)
@@ -53,6 +59,7 @@ def parse_rrule_string(rrule_string):
         recurrence.append(f'RRULE:FREQ={freq};UNTIL={until_str};INTERVAL={interval}')
 
     return recurrence
+
 
 def add_events_to_google_calendar(service, ics_file_path):
     with open(ics_file_path, 'rb') as f:
@@ -90,88 +97,58 @@ def add_events_to_google_calendar(service, ics_file_path):
             service.events().insert(calendarId=calendar_id, body=event_body).execute()
 
     print("События успешно добавлены в новый календарь Google.")
-    global server_should_shutdown
-    server_should_shutdown = True  # Установка флага для остановки сервера
 
-async def authenticate_google_calendar(ngrok_tunnel_url):
-    flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES, redirect_uri=ngrok_tunnel_url)
-    authorization_url, _ = flow.authorization_url(access_type='offline', prompt='consent')
 
-    webbrowser.open(authorization_url)
+async def get_authorization_code():
+    async with aiohttp.ClientSession() as session:
+        async with session.get('https://v2462318.hosted-by-vdsina.ru/oauth/callback/') as response:
+            if response.status == 200:
+                return await response.text()
+            else:
+                return None
 
-    local_server_thread = threading.Thread(target=start_local_server)
-    ngrok_thread = threading.Thread(target=start_ngrok)
-    local_server_thread.start()
-    ngrok_thread.start()
+def parse_authorization_code(callback_url):
+    parsed_url = urlparse(callback_url)
+    query_params = parse_qs(parsed_url.query)
+    authorization_code = query_params.get('code', [None])[0]
+    return authorization_code
 
-    ngrok_thread.join()
+async def authenticate_google_calendar(bot, update):
+    with open(CRED_JSON, 'r') as f:
+        cred_data = json.load(f)
+        installed_data = cred_data['installed']
+    client = GoogleClient(
+        client_id=installed_data['client_id'],
+        client_secret=installed_data['client_secret'],
+        redirect_uri=REDIRECT_URI,
+        scope=SCOPES[0]
+    )
+    authorization_url = client.get_authorize_url()
 
-    while not authorization_response:
+    if not authorization_url.startswith('https://'):
+        raise ValueError("authorization_url должен начинаться с https://")
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Авторизоваться', url=authorization_url)]])
+
+    await bot.send_message(update.message.chat_id, 'Пожалуйста, нажмите на кнопку ниже, чтобы авторизоваться:', reply_markup=keyboard)
+
+    # Ждем ответа пользователя с кодом авторизации через callback
+    authorization_code = None
+    while not authorization_code:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(REDIRECT_URI) as response:
+                if response.status == 200:
+                    authorization_code = await response.text()
+                    break
         await asyncio.sleep(1)
 
-    flow.fetch_token(authorization_response=authorization_response)
-
-    service = build('calendar', 'v3', credentials=flow.credentials)
-
+    access_token, expires_in = await client.get_access_token(code=authorization_code)
+    credentials = Credentials(access_token)
+    service = build('calendar', 'v3', credentials=credentials)
     return service
 
-class OAuthCallbackHandler(BaseHTTPRequestHandler):
-    authorization_code = None
-
-    def do_GET(self):
-        global authorization_response
-        parsed_path = urlparse(self.path)
-        query = parse_qs(parsed_path.query)
-        if 'code' in query:
-            OAuthCallbackHandler.authorization_code = query['code'][0]
-
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html')
-            self.end_headers()
-            self.wfile.write(b'<html><head><title>Authentication Successful</title></head>')
-            self.wfile.write(b'<body><p>Authentication successful! You can close this window now.</p></body></html>')
-            authorization_response = query['code'][0]
-            global server_should_shutdown
-            if server_should_shutdown:
-                self.server.shutdown()
-        else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b'Not found')
-
-def is_port_in_use(port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(('localhost', port)) == 0
-def start_local_server():
-    if is_port_in_use(PORT):
-        print(f"Порт {PORT} уже используется. Выберите другой порт или остановите процесс, который его занимает.")
-        return
-
-    server_address = ('localhost', PORT)
-    httpd = http.server.HTTPServer(server_address, OAuthCallbackHandler)
-    print(f"Сервер запущен на порту {PORT}")
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        pass
-
-async def start_ngrok():
-    try:
-        tunnels = ngrok.get_tunnels()
-        for tunnel in tunnels:
-            ngrok.disconnect(tunnel.public_url)
-
-        conf.get_default().config_path = NGROK_CONFIG_PATH
-
-        ngrok_tunnel = ngrok.connect(PORT, proto='http', name='goodpromised')
-        ngrok_tunnel_url = ngrok_tunnel.public_url + '/'
-        print(f"ngrok tunnel URL: {ngrok_tunnel_url}")
-        return ngrok_tunnel_url
-    except Exception as e:
-        print(f"Ошибка при запуске ngrok: {e}")
 
 async def main():
-    global ngrok_tunnel_url
     subprocess_ics_file_path = sys.argv[1] if len(sys.argv) > 1 else None
     if subprocess_ics_file_path:
         ics_file_path = subprocess_ics_file_path
@@ -187,20 +164,23 @@ async def main():
     if bot_context is not None:
         bot = Bot(token=bot_context)
         await bot.initialize()
+
     if os.path.exists(ics_file_path):
-        ngrok_tunnel_url = await start_ngrok()
-        if ngrok_tunnel_url:
-            service = await authenticate_google_calendar(ngrok_tunnel_url)
-            if service:
-                print("Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря.")
-                add_events_to_google_calendar(service, ics_file_path)
-                print("События успешно добавлены в календарь Google.")
-            else:
-                print("Не удалось выполнить аутентификацию.")
+        service = await authenticate_google_calendar(bot, update)
+        if service:
+            await send_telegram_message(bot, update.message.chat_id, ["Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря."])
+            #print("Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря.")
+            add_events_to_google_calendar(service, ics_file_path)
+            await send_telegram_message(bot, update.message.chat_id,
+                                        ["События успешно добавлены в календарь Google."])
+            #print("События успешно добавлены в календарь Google.")
         else:
-            print("Не удалось запустить ngrok.")
+            await send_telegram_message(bot, update.message.chat_id,
+                                        ["Не удалось выполнить аутентификацию."])
+            #print("Не удалось выполнить аутентификацию.")
     else:
         print("Указанный файл не существует.")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

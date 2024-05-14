@@ -11,13 +11,13 @@ from telegram_utils import send_telegram_message, get_telegram_input
 from db.db_operations import create_users_tables_table, add_user_table_entry
 
 
-async def main(update, bot_context):
+async def main(update, bot_context, user_id):
     driver = setup_driver()
     try:
         driver.get("https://timetable.ksu.edu.ru/")
         bot = Bot(token=bot_context)
         await bot.initialize()
-        schedule_json, output_json_file = await select_schedule(bot, driver, update)
+        schedule_json, output_json_file = await select_schedule(bot, driver, update, user_id)
         subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file], check=True)
         output_dir = os.path.dirname(output_json_file)
         ical_dir = os.path.join(output_dir, "ICAL")
@@ -47,7 +47,7 @@ async def main(update, bot_context):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print("Недостаточно аргументов. Укажите update_data.")
         sys.exit(1)
 
@@ -55,4 +55,5 @@ if __name__ == "__main__":
     update = Update.de_json(update_data, None)
 
     bot_context = sys.argv[2]
-    asyncio.run(main(update, bot_context))
+    user_id = sys.argv[3]
+    asyncio.run(main(update, bot_context, user_id))

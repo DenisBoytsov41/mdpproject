@@ -27,15 +27,17 @@ async def send_telegram_message(bot, chat_id, messages):
         for i in range(0, len(message_text), max_message_length):
             await bot.send_message(chat_id, text=message_text[i:i+max_message_length])
 
-async def get_input(bot, update, prompt):
+async def get_input(bot, update, user_id, prompt):
     await bot.send_message(chat_id=update.message.chat_id, text=prompt)
 
     while True:
         await asyncio.sleep(1)
         async with input_lock:
             updates = await bot.get_updates(offset=update.update_id + 1)
-            if updates:
-                last_input_time = input_history.get(update.message.chat_id, 0)
+            if len(updates) != 0:
+                update = updates[-1]
+            if updates and int(user_id) == update.effective_user.id:
+                last_input_time = input_history.get(update.effective_user.id, 0)
                 new_updates = [u for u in updates if u.message.date.timestamp() > last_input_time]
                 if new_updates:
                     response = new_updates[-1].message.text
@@ -44,7 +46,7 @@ async def get_input(bot, update, prompt):
                         input_history[update.message.chat_id] = new_updates[-1].message.date.timestamp()
                         return response
 
-async def select_schedule(bot, driver, update):
+async def select_schedule(bot, driver, update, user_id):
     select_element_semester = WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.ID, "semester"))
     )
@@ -65,7 +67,7 @@ async def select_schedule(bot, driver, update):
 
         selected_semester_index = None
         while selected_semester_index is None:
-            user_input = await get_input(bot, update, "Введите номер семестра:")
+            user_input = await get_input(bot, update, user_id,"Введите номер семестра:")
             if user_input is not None:
                 try:
                     selected_semester_index = int(user_input)
@@ -88,12 +90,12 @@ async def select_schedule(bot, driver, update):
 
         selected_semester_id = semester_id_mapping[selected_semester_index]
 
-        user_input = await get_input(bot, update,
+        user_input = await get_input(bot, update, user_id,
                                      "Введите 'student' для расписания студента или 'teacher' для расписания преподавателя: ")
 
         while user_input.lower() not in ['student', 'teacher']:
             await send_telegram_message(bot, update.message.chat_id, ["Неверный ввод. Введите 'student' или 'teacher'."])
-            user_input = await get_input(bot, update,
+            user_input = await get_input(bot, update, user_id,
                                          "Введите 'student' для расписания студента или 'teacher' для расписания преподавателя: ")
 
         if user_input.lower() == 'student':
@@ -125,7 +127,7 @@ async def select_schedule(bot, driver, update):
 
             selected_institute_index = None
             while selected_institute_index is None:
-                user_input = await get_input(bot, update, "Введите номер института:")
+                user_input = await get_input(bot, update, user_id,"Введите номер института:")
                 if user_input is not None:
                     try:
                         selected_institute_index = int(user_input)
@@ -169,7 +171,7 @@ async def select_schedule(bot, driver, update):
 
             selected_speciality_index = None
             while selected_speciality_index is None:
-                user_input = await get_input(bot, update, "Введите номер специальности:")
+                user_input = await get_input(bot, update, user_id,"Введите номер специальности:")
                 if user_input is not None:
                     try:
                         selected_speciality_index = int(user_input)
@@ -214,7 +216,7 @@ async def select_schedule(bot, driver, update):
 
             selected_group_index = None
             while selected_group_index is None:
-                user_input = await get_input(bot, update, "Введите номер группы:")
+                user_input = await get_input(bot, update, user_id,"Введите номер группы:")
                 if user_input is not None:
                     try:
                         selected_group_index = int(user_input)
@@ -282,7 +284,7 @@ async def select_schedule(bot, driver, update):
 
             selected_teacher_index = None
             while selected_teacher_index is None:
-                user_input = await get_input(bot, update, "Введите номер преподавателя:")
+                user_input = await get_input(bot, update, user_id,"Введите номер преподавателя:")
                 if user_input is not None:
                     try:
                         selected_teacher_index = int(user_input)

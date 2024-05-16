@@ -9,6 +9,7 @@ class ButtonPaginator:
         self.command = command
         self.callback_command = callback_command
         self.flag = False
+        self.button_pressed = None
 
     async def start_paginator(self, update, bot):
         self.flag = True
@@ -88,6 +89,7 @@ class ButtonPaginator:
         else:
             button_number = int(data[0].replace(self.callback_command, ''))
             await bot.send_message(chat_id=query.message.chat.id, text=f"Нажата кнопка {button_number}")
+            self.button_pressed = button_number
 
     async def run(self):
         bot = Bot(token=self.telegram_api_token)

@@ -129,8 +129,12 @@ async def authenticate_google_calendar(bot, update):
         raise ValueError("authorization_url должен начинаться с https://")
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='Авторизоваться', url=authorization_url)]])
-
-    await bot.send_message(update.message.chat_id, 'Пожалуйста, нажмите на кнопку ниже, чтобы авторизоваться:', reply_markup=keyboard)
+    user_id = None
+    if update.message is not None:
+        user_id = update.message.chat_id
+    if user_id is None and update.callback_query is not None:
+        user_id = update.callback_query.message.chat.id
+    await bot.send_message(user_id, 'Пожалуйста, нажмите на кнопку ниже, чтобы авторизоваться:', reply_markup=keyboard)
 
     # Ждем ответа пользователя с кодом авторизации через callback
     authorization_code = None
@@ -167,15 +171,20 @@ async def main():
 
     if os.path.exists(ics_file_path):
         service = await authenticate_google_calendar(bot, update)
+        user_id = None
+        if update.message is not None:
+            user_id = update.message.chat_id
+        if user_id is None and update.callback_query is not None:
+            user_id = update.callback_query.message.chat.id
         if service:
-            await send_telegram_message(bot, update.message.chat_id, ["Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря."])
+            await send_telegram_message(bot, user_id, ["Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря."])
             #print("Успешная аутентификация. Теперь вы можете использовать сервис Google Календаря.")
             add_events_to_google_calendar(service, ics_file_path)
-            await send_telegram_message(bot, update.message.chat_id,
+            await send_telegram_message(bot, user_id,
                                         ["События успешно добавлены в календарь Google."])
             #print("События успешно добавлены в календарь Google.")
         else:
-            await send_telegram_message(bot, update.message.chat_id,
+            await send_telegram_message(bot, user_id,
                                         ["Не удалось выполнить аутентификацию."])
             #print("Не удалось выполнить аутентификацию.")
     else:

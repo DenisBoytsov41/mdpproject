@@ -12,12 +12,19 @@ from db.db_operations import create_users_tables_table, add_user_table_entry
 
 
 async def main(update, bot_context, user_id):
+    if update is None:
+        print("Ошибка: Объект update не был передан.")
+        return
+
     driver = setup_driver()
     try:
         driver.get("https://timetable.ksu.edu.ru/")
         bot = Bot(token=bot_context)
         await bot.initialize()
         schedule_json, output_json_file = await select_schedule(bot, driver, update, user_id)
+        if output_json_file is None:
+            await send_telegram_message(update, "Произошла ошибка при выполнении команды. output_json_file не был создан.")
+            return
         subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file], check=True)
         output_dir = os.path.dirname(output_json_file)
         ical_dir = os.path.join(output_dir, "ICAL")
@@ -39,7 +46,7 @@ async def main(update, bot_context, user_id):
             await send_telegram_message(update, "Нет файлов формата .ics в папке ICAL.")
 
     except Exception as e:
-        error_message = "Произошла ошибка при выполнении команды."
+        error_message = f"Произошла ошибка при выполнении команды. {e}"
         await send_telegram_message(update, error_message)
 
     finally:

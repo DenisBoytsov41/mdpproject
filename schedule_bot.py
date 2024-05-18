@@ -30,7 +30,10 @@ async def start_JSON(update: Update, bot: Bot):
         await send_telegram_message(update, f"Ошибка: {e}", bot)
 
 async def send_telegram_message(update: Update, message: str, bot: Bot):
-    await bot.send_message(chat_id=update.message.chat_id, text=message)
+    if update.message is not None:
+        await bot.send_message(chat_id=update.message.chat_id, text=message)
+    else:
+        await bot.send_message(chat_id=update.callback_query.message.chat.id, text=message)
 
 async def send_telegram_message_2(chat_id, message: str, bot: Bot):
     await bot.send_message(chat_id=chat_id, text=message)

@@ -4,7 +4,7 @@ import subprocess
 import sys
 from telegram import Update
 from webdriver_setup import setup_driver
-from schedule import select_schedule
+from schedule import select_semester
 from telegram import Bot
 from config import *
 from telegram_utils import send_telegram_message, get_telegram_input
@@ -21,7 +21,7 @@ async def main(update, bot_context, user_id):
         driver.get("https://timetable.ksu.edu.ru/")
         bot = Bot(token=bot_context)
         await bot.initialize()
-        schedule_json, output_json_file = await select_schedule(bot, driver, update, user_id)
+        schedule_json, output_json_file = await select_semester(bot, driver, update, user_id)
         if output_json_file is None:
             await send_telegram_message(update, "Произошла ошибка при выполнении команды. output_json_file не был создан.")
             return

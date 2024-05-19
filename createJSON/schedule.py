@@ -14,6 +14,8 @@ from telegram.ext import CallbackContext
 
 input_history = {}
 processed_updates = {}
+select_element_semester = None
+schedule = None
 
 async def send_telegram_message(bot, chat_id, messages):
     max_message_length = 4096
@@ -25,74 +27,80 @@ async def send_telegram_message(bot, chat_id, messages):
         for i in range(0, len(message_text), max_message_length):
             await bot.send_message(chat_id, text=message_text[i:i + max_message_length])
 
-async def select_semester(bot, driver, update, user_id):
+async def get_dom_element(bot, driver, update, user_id, element_id="semester", wait_time=10):
     try:
-        select_element_semester = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "semester"))
+        global select_element_semester
+        WebDriverWait(driver, wait_time).until(
+            EC.presence_of_element_located((By.ID, element_id))
         )
         html_content = driver.page_source
         soup = BeautifulSoup(html_content, 'html.parser')
-        select_element_semester = soup.find('select', {'id': 'semester'})
-
+        select_element_semester = soup.find('select', {'id': element_id})
         if select_element_semester:
-            options_semester = select_element_semester.find_all('option')
-
-            buttons = []
-            for i, option_semester in enumerate(options_semester[1:], start=1):
-                button = InlineKeyboardButton(f"{i}. {option_semester.text}", callback_data=f"semester{i}")
-                buttons.append([button])
-            button = InlineKeyboardButton("Назад к предыдущему запросу", callback_data="backrequest_semester")
+            return await select_semester(bot, driver, update, user_id, select_element_semester)
+        else:
+            await send_telegram_message(bot, user_id, ["Элемент не найден."])
+    except Exception as e:
+        await send_telegram_message(bot, user_id, [f"Ошибка при получении элемента DOM: {e}"])
+async def select_semester(bot, driver, update, user_id, select_element_semester):
+    try:
+        options_semester = select_element_semester.find_all('option')
+        buttons = []
+        for i, option_semester in enumerate(options_semester[1:], start=1):
+            button = InlineKeyboardButton(f"{i}. {option_semester.text}", callback_data=f"semester{i}")
             buttons.append([button])
-            paginator = ButtonPaginator(buttons, TELEGRAM_API_TOKEN, user_id, callback_command="semester")
-            await paginator.start(user_id, bot)
-            await bot.send_message(chat_id=user_id, text="Нажмите на кнопку:")
-            selected_semester_index = await paginator.run(processed_updates)
-            sem_input_sent = False
-            await clear_all_callbacks(bot)
-            update = paginator.update
-            while selected_semester_index is None:
-                if not sem_input_sent:
-                    await send_telegram_message(bot, user_id, ["Пожалуйста, введите номер семестра."])
-                    sem_input_sent = True
-                user_input = paginator.button_pressed
-                if paginator.update is not None:
-                    update = paginator.update
-                if user_input is not None:
-                    try:
-                        selected_semester_index = int(user_input)
-                    except ValueError:
-                        await send_telegram_message(bot, user_id, ["Некорректный ввод. Введите число."])
-                else:
-                    if update and update.callback_query and update.callback_query.data is not None:
-                        if update.callback_query.data.split('_')[-1] == paginator.session_id:
-                            await paginator.handle_callback_query(update.callback_query, update, bot)
-                        else:
-                            await asyncio.sleep(1)
-            paginator.clear_state()
-
-            semester_id_mapping = {
-                1: 8,
-                2: 4,
-                3: 3,
-                4: 2,
-                5: 1
-            }
-            update = paginator.update
-            if selected_semester_index not in semester_id_mapping:
-                await send_telegram_message(bot, user_id, ["Возврат к предыдущему запросу не возможен. Выход из функции."])
-                await asyncio.sleep(1)
-                paginator.clear_state()
-                return
-
-            selected_semester_id = semester_id_mapping[selected_semester_index]
-            if user_id not in input_history:
-                input_history[user_id] = {}
-            update = paginator.update
-            if selected_semester_id is not None:
-                input_history[user_id]["selected_semester"] = selected_semester_id
-                return await select_user_type(bot, driver, update, user_id)
+        button = InlineKeyboardButton("Назад к предыдущему запросу", callback_data="backrequest_semester")
+        buttons.append([button])
+        paginator = ButtonPaginator(buttons, TELEGRAM_API_TOKEN, user_id, callback_command="semester")
+        await paginator.start(user_id, bot)
+        await bot.send_message(chat_id=user_id, text="Нажмите на кнопку:")
+        selected_semester_index = await paginator.run(processed_updates)
+        sem_input_sent = False
+        await clear_all_callbacks(bot)
+        update = paginator.update
+        while selected_semester_index is None:
+            if not sem_input_sent:
+                await send_telegram_message(bot, user_id, ["Пожалуйста, введите номер семестра."])
+                sem_input_sent = True
+            user_input = paginator.button_pressed
+            if paginator.update is not None:
+                update = paginator.update
+            if user_input is not None:
+                try:
+                    selected_semester_index = int(user_input)
+                except ValueError:
+                    await send_telegram_message(bot, user_id, ["Некорректный ввод. Введите число."])
             else:
-                await send_telegram_message(bot, user_id, ["Пожалуйста, выберите семестр."])
+                if update and update.callback_query and update.callback_query.data is not None:
+                    if update.callback_query.data.split('_')[-1] == paginator.session_id:
+                        await paginator.handle_callback_query(update.callback_query, update, bot)
+                    else:
+                        await asyncio.sleep(1)
+        paginator.clear_state()
+
+        semester_id_mapping = {
+            1: 8,
+            2: 4,
+            3: 3,
+            4: 2,
+            5: 1
+        }
+        update = paginator.update
+        if selected_semester_index not in semester_id_mapping:
+            await send_telegram_message(bot, user_id, ["Возврат к предыдущему запросу не возможен. Выход из функции."])
+            await asyncio.sleep(1)
+            paginator.clear_state()
+            return
+
+        selected_semester_id = semester_id_mapping[selected_semester_index]
+        if user_id not in input_history:
+            input_history[user_id] = {}
+        update = paginator.update
+        if selected_semester_id is not None:
+            input_history[user_id]["selected_semester"] = selected_semester_id
+            return await select_user_type(bot, driver, update, user_id)
+        else:
+            await send_telegram_message(bot, user_id, ["Пожалуйста, выберите семестр."])
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
@@ -123,7 +131,7 @@ async def select_user_type(bot, driver, update, user_id):
                 selected_user_type = "teacher"
             else:
                 selected_user_type = "backrequest_usertype"
-            input_history[user_id]["selected_user_type"] = selected_user_type
+            input_history[user_id]["selected_usertype"] = selected_user_type
             update = user_type_paginator.update
             if selected_user_type == "student":
                 await send_telegram_message(bot, user_id, [f"Выбран тип пользователя: {selected_user_type}"])
@@ -280,6 +288,7 @@ async def select_group(bot, driver, update, user_id):
 
 async def get_schedule(bot, driver, update, user_id):
     try:
+        global schedule
         # Получаем информацию о выборах пользователя из истории
         selected_semester_id = input_history[user_id]["selected_semester"]
         selected_institute = input_history[user_id]["selected_institute"]
@@ -351,6 +360,7 @@ async def select_teacher(bot, driver, update, user_id):
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 async def get_teacher_schedule(bot, driver, update, user_id):
     try:
+        global schedule
         selected_semester_id = input_history[user_id]["selected_semester"]
         selected_teacher = input_history[user_id]["selected_teacher"]
         data_schedule = {
@@ -376,7 +386,7 @@ async def handle_back_button(bot, driver, update, user_id):
             # Удаляем последний выбор из истории
             input_history[user_id].popitem()
             # Перенаправляем пользователя на предыдущий этап
-            await navigate_to_previous_stage(bot, driver, update, user_id)
+            return await navigate_to_previous_stage(bot, driver, update, user_id)
         else:
             # Если история пользователя пуста, отправляем сообщение об ошибке
             await send_telegram_message(bot, user_id, ["Нет предыдущих этапов для возврата."])
@@ -385,6 +395,7 @@ async def handle_back_button(bot, driver, update, user_id):
 
 async def navigate_to_previous_stage(bot, driver, update, user_id):
     try:
+        global select_element_semester
         await clear_all_callbacks(bot)
         # Проверяем, есть ли какие-либо предыдущие выборы в истории пользователя
         if user_id in input_history and input_history[user_id]:
@@ -397,8 +408,8 @@ async def navigate_to_previous_stage(bot, driver, update, user_id):
             # Определяем тип этапа и перенаправляем пользователя соответственно
             if last_choice == "selected_semester":
                 input_history[user_id].popitem()
-                await select_semester(bot, driver, update, user_id)
-            elif last_choice == "selected_user_type":
+                await select_semester(bot, driver, update, user_id, select_element_semester)
+            elif last_choice == "selected_usertype":
                 input_history[user_id].popitem()
                 await select_user_type(bot, driver, update, user_id)
             elif last_choice == "selected_institute":
@@ -434,4 +445,13 @@ async def clear_all_callbacks(bot):
 
     except Exception as e:
         print(f"Ошибка при очистке callback'ов: {e}")
+
+async def back_schedule(bot, driver, update, user_id):
+    try:
+        global schedule
+        while schedule is None:
+            await asyncio.sleep(0.1)
+        return schedule
+    except Exception as e:
+        await send_telegram_message(bot, user_id, [f"Ошибка: {e}"])
 

@@ -80,6 +80,26 @@ def add_user_table_entry(user_id, table_name):
         print(f"Произошла ошибка при добавлении записи в таблицу users_tables: {e}")
     finally:
         conn.close()
+
+def get_user_ics_files(user_id):
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT table_names FROM users_tables WHERE user_id=?", (user_id,))
+        user_tables_entry = cursor.fetchone()
+
+        if user_tables_entry:
+            table_names = user_tables_entry[0]
+            ics_files = table_names.split(',')
+            return [f"{table_name}.ics" for table_name in ics_files]
+        else:
+            return []
+    except Exception as e:
+        print(f"Произошла ошибка при получении файлов .ics для пользователя {user_id}: {e}")
+        return []
+    finally:
+        conn.close()
 def normalize_parameter(param):
     try:
         current_encoding = getattr(param, 'encoding', None)

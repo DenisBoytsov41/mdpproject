@@ -6,7 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from schedule_processing import process_schedule_response
 import asyncio
-from APIelements.ButtonManager import ButtonPaginator
+from allClasses.ButtonManager import ButtonPaginator
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from config import TELEGRAM_API_TOKEN
 import collections

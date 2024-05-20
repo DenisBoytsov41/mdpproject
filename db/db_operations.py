@@ -225,7 +225,7 @@ def extract_data_format1_from_db(table_name):
             }
             data.append(entry)
 
-        return data
+            return data
     except sqlite3.Error as e:
         print(f"Произошла ошибка при извлечении данных из БД: {e}")
         return None

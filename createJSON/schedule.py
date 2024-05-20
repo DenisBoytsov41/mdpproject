@@ -12,11 +12,16 @@ from config import TELEGRAM_API_TOKEN
 import collections
 from telegram.ext import CallbackContext
 
+# Словарь для хранения истории ввода пользователя
 input_history = {}
+# Словарь для хранения обработанных обновлений
 processed_updates = {}
+# Элемент для выбора семестра на веб-странице
 select_element_semester = None
+# Переменная для хранения расписания
 schedule = None
 
+# Метод для отправки сообщения в Telegram
 async def send_telegram_message(bot, chat_id, messages):
     max_message_length = 4096
     message_text = "\n".join(messages)
@@ -27,6 +32,7 @@ async def send_telegram_message(bot, chat_id, messages):
         for i in range(0, len(message_text), max_message_length):
             await bot.send_message(chat_id, text=message_text[i:i + max_message_length])
 
+# Метод для получения DOM-элемента на веб-странице
 async def get_dom_element(bot, driver, update, user_id, element_id="semester", wait_time=10):
     try:
         global select_element_semester
@@ -42,6 +48,8 @@ async def get_dom_element(bot, driver, update, user_id, element_id="semester", w
             await send_telegram_message(bot, user_id, ["Элемент не найден."])
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Ошибка при получении элемента DOM: {e}"])
+
+# Метод для обработки выбора семестра
 async def select_semester(bot, driver, update, user_id, select_element_semester):
     try:
         options_semester = select_element_semester.find_all('option')
@@ -104,6 +112,7 @@ async def select_semester(bot, driver, update, user_id, select_element_semester)
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки выбора типа пользователя (студент или преподаватель)
 async def select_user_type(bot, driver, update, user_id):
     try:
         selected_semester_id = input_history[user_id]["selected_semester"]
@@ -147,6 +156,7 @@ async def select_user_type(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки выбора института
 async def select_institute(bot, driver, update, user_id):
     try:
         # Получаем выбранный семестр из состояния пользователя
@@ -192,6 +202,7 @@ async def select_institute(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки выбора специальности
 async def select_speciality(bot, driver, update, user_id):
     try:
         selected_semester_id = input_history[user_id]["selected_semester"]
@@ -237,6 +248,7 @@ async def select_speciality(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки выбора группы
 async def select_group(bot, driver, update, user_id):
     try:
         selected_semester_id = input_history[user_id]["selected_semester"]
@@ -286,6 +298,7 @@ async def select_group(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для получения расписания
 async def get_schedule(bot, driver, update, user_id):
     try:
         global schedule
@@ -316,6 +329,7 @@ async def get_schedule(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки выбора преподавателя
 async def select_teacher(bot, driver, update, user_id):
     try:
         selected_semester_id = input_history[user_id]["selected_semester"]
@@ -358,6 +372,8 @@ async def select_teacher(bot, driver, update, user_id):
             await send_telegram_message(bot, user_id, ["Пожалуйста, выберите преподавателя."])
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
+
+# Метод для получения расписания преподавателя
 async def get_teacher_schedule(bot, driver, update, user_id):
     try:
         global schedule
@@ -379,6 +395,7 @@ async def get_teacher_schedule(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для обработки нажатия на кнопку "Назад"
 async def handle_back_button(bot, driver, update, user_id):
     try:
         # Проверяем, есть ли какие-либо предыдущие выборы в истории пользователя
@@ -393,6 +410,7 @@ async def handle_back_button(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для навигации к предыдущему этапу выбора
 async def navigate_to_previous_stage(bot, driver, update, user_id):
     try:
         global select_element_semester
@@ -429,6 +447,7 @@ async def navigate_to_previous_stage(bot, driver, update, user_id):
     except Exception as e:
         await send_telegram_message(bot, user_id, [f"Произошла ошибка: {e}"])
 
+# Метод для очистки всех callback'ов
 async def clear_all_callbacks(bot):
     try:
         updates = await bot.get_updates()
@@ -446,6 +465,7 @@ async def clear_all_callbacks(bot):
     except Exception as e:
         print(f"Ошибка при очистке callback'ов: {e}")
 
+# Метод для возврата расписания
 async def back_schedule(bot, driver, update, user_id):
     try:
         global schedule

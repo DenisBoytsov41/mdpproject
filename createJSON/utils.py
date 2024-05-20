@@ -4,6 +4,8 @@ import ssl
 from requests.adapters import HTTPAdapter
 from urllib3.poolmanager import PoolManager
 from config import THIRD_ELEMENTS_DIR
+from telegram import Update
+from selenium import webdriver
 class NoVerifyHTTPAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block,
@@ -58,3 +60,14 @@ def shorten_filename(filename, max_length=200):
         truncated_name = first_part[:max_length // 2] + "__" + next_part + "__" + last_part
         return truncated_name + extension
 
+async def send_telegram_message(update: Update, message: str):
+    print(f"Отправка сообщения: {message}")
+
+async def get_telegram_input(update: Update, prompt: str):
+    response = input("Введите свой ответ: ")
+    return response
+
+def setup_driver():
+    driver = webdriver.Chrome()
+
+    return driver

@@ -27,8 +27,6 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 CLIENT_SECRETS_FILE = 'credentials.json'
-SCOPES = ['https://www.googleapis.com/auth/calendar']
-REDIRECT_URI = 'https://v2462318.hosted-by-vdsina.ru/oauth/callback/'
 authorization_response = None
 
 

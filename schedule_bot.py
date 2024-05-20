@@ -82,7 +82,7 @@ if TELEGRAM_API_TOKEN is None:
     exit(1)
 
 telegram_bot = TelegramBot(TELEGRAM_API_TOKEN)
-telegram_bot.register_command("start", "Start the bot", start)
+telegram_bot.register_command("start", "Получить список команд бота", start)
 telegram_bot.register_command("createCal", "Создать календарь", start_JSON)
 telegram_bot.register_command("listIcsFiles", "Получить список календарей", list_ics_files)
 telegram_bot.register_command("DownUserFilCal", "Получить список календарей с возможностью скачивания", list_ics_files_down)

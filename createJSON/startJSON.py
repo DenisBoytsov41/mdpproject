@@ -3,13 +3,10 @@ import json
 import subprocess
 import sys
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CallbackQueryHandler
-
-from webdriver_setup import setup_driver
 from schedule import back_schedule,get_dom_element
 from telegram import Bot
 from config import *
-from telegram_utils import send_telegram_message, get_telegram_input
+from createJSON.utils import send_telegram_message, setup_driver
 from db.db_operations import create_users_tables_table, add_user_table_entry
 
 

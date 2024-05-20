@@ -34,6 +34,7 @@ class ButtonPaginator:
         self.update = None
         self.last_callback_time = datetime.now()
         self.pressed_buttons.clear()
+        self.previous_callback = None
 
     def paginate_buttons(self, page_size=5):
         paginated_buttons = []
@@ -154,113 +155,91 @@ class ButtonPaginator:
         return press
 
     async def run(self, processed_updates=None):
-        bot = Bot(token=self.telegram_api_token)
-        await bot.initialize()
+        bot = await self.initialize_bot()
         max_update_id = 0
 
         while True:
             try:
-                updates = await bot.get_updates(offset=max_update_id + 1, timeout=60)
+                updates = await self.fetch_updates(bot, max_update_id)
                 for update in updates:
                     if update.message:
-                        if self.command is not None:
-                            if update.message.text.startswith(self.command):
-                                if processed_updates is not None:
-                                    if update.message.message_id not in processed_updates:
-                                        self.flag = False
-                                        await self.start(update.effective_chat.id, bot)
-                                        max_update_id = update.update_id
-                                        self.update = update
-                                else:
-                                    self.flag = False
-                                    await self.start(update.effective_chat.id, bot)
-                                    max_update_id = update.update_id
-                                    self.update = update
-                        else:
-                            if self.flag:
-                                if processed_updates is not None:
-                                    if update.message.message_id not in processed_updates:
-                                        self.flag = False
-                                        await self.start(update.effective_chat.id, bot)
-                                        max_update_id = update.update_id
-                                        self.update = update
-                                else:
-                                    self.flag = False
-                                    await self.start(update.effective_chat.id, bot)
-                                    max_update_id = update.update_id
-                                    self.update = update
+                        callback = await self.handle_message(update, bot, processed_updates)
+                        if callback is not None:
+                            return callback
                     elif update.callback_query:
-                        if processed_updates is not None:
-                            if update.callback_query.message.message_id not in processed_updates:
-                                query = update.callback_query
-                                self.update = update
-                                current_time = datetime.now()
-                                if (current_time - self.last_callback_time).total_seconds() > 30:
-                                    #await bot.send_message(chat_id=query.message.chat.id, text=f"Запрос устарел")
-                                    self.clear_state()
-                                    continue
-                                if self.previous_callback == query.data:
-                                    continue
-                                total = update.callback_query.data.split('_')
-                                comm = None
-                                if len(total) == 3:
-                                    comm = total[0]
-                                elif len(total) == 2:
-                                    comm = total[0]
-                                if comm in ['prev', 'next', 'page']:
-                                    self.update = update
-                                    await self.handle_button_press(query, self.update, bot)
-                                    max_update_id = update.update_id
-                                    self.last_callback_time = current_time
-                                if update.callback_query.data not in ['start', 'createCal', 'create_cal']:
-                                    total_1 = None
-                                    if len(total)>=2:
-                                        total_1 = total[1]
-                                    if self.callback_command in update.callback_query.data or total_1 == self.callback_command:
-                                        press = None
-                                        while press is None:
-                                            self.update = update
-                                            press = await self.handle_button_press(query, self.update, bot)
-                                            print(press)
-                                            await asyncio.sleep(1)
-                                        max_update_id = update.update_id
-                                        self.last_callback_time = current_time
-                                        return press
-                        else:
-                            query = update.callback_query
-                            self.update = update
-                            current_time = datetime.now()
-                            if (current_time - self.last_callback_time).total_seconds() > 30:
-                                #await bot.send_message(chat_id=query.message.chat.id, text=f"Запрос устарел")
-                                self.clear_state()
-                                continue
-                            if self.previous_callback == query.data:
-                                continue
-                            total = update.callback_query.data.split('_')
-                            comm = None
-                            if len(total) == 3:
-                                comm = total[0]
-                            elif len(total) == 2:
-                                comm = total[0]
-                            if comm in ['prev', 'next', 'page']:
-                                self.update = update
-                                await self.handle_button_press(query, self.update, bot)
-                                max_update_id = update.update_id
-                                self.last_callback_time = current_time
-                            if update.callback_query.data not in ['start', 'createCal', 'create_cal']:
-                                total_1 = None
-                                if len(total)>=2:
-                                    total_1 = total[1]
-                                if self.callback_command in update.callback_query.data or total_1 == self.callback_command:
-                                    press = None
-                                    while press is None:
-                                        self.update = update
-                                        press = await self.handle_button_press(query, self.update, bot)
-                                        print(press)
-                                        await asyncio.sleep(1)
-                                    max_update_id = update.update_id
-                                    self.last_callback_time = current_time
-                                    return press
+                        callback = await self.process_incoming_callback(update, bot, processed_updates)
+                        if callback is not None:
+                            return callback
+                if updates:
+                    max_update_id = updates[-1].update_id
             except Exception as e:
                 print(f"Error in main loop: {e}")
             await asyncio.sleep(1)
+
+    async def initialize_bot(self):
+        bot = Bot(token=self.telegram_api_token)
+        await bot.initialize()
+        return bot
+
+    async def fetch_updates(self, bot, max_update_id):
+        updates = await bot.get_updates(offset=max_update_id + 1, timeout=60)
+        return updates
+
+    async def handle_message(self, update, bot, processed_updates):
+        if self.command is not None and update.message.text.startswith(self.command):
+            if self.is_new_update(update.message.message_id, processed_updates):
+                await self.process_command(update, bot)
+                self.update = update
+        elif self.flag:
+            if self.is_new_update(update.message.message_id, processed_updates):
+                await self.process_command(update, bot)
+                self.update = update
+
+    async def process_command(self, update, bot):
+        self.flag = False
+        await self.start(update.effective_chat.id, bot)
+
+    def is_new_update(self, message_id, processed_updates):
+        return processed_updates is None or message_id not in processed_updates
+
+    async def process_incoming_callback(self, update, bot, processed_updates):
+        if self.is_new_update(update.callback_query.message.message_id, processed_updates):
+            query = update.callback_query
+            self.update = update
+            current_time = datetime.now()
+            return await self.process_callback(update, query, bot, current_time)
+
+    async def process_callback(self, update, query, bot, current_time):
+        if (current_time - self.last_callback_time).total_seconds() > 30:
+            self.clear_state()
+            return
+
+        if self.previous_callback == query.data:
+            return
+
+        total = query.data.split('_')
+        comm = total[0] if len(total) >= 2 else None
+
+        if comm in ['prev', 'next', 'page']:
+            await self.handle_button_press(query, self.update, bot)
+            self.last_callback_time = current_time
+            self.previous_callback = query.data
+            self.update = update
+            return None
+
+        if query.data not in ['start', 'createCal', 'create_cal']:
+            total_1 = total[1] if len(total) >= 2 else None
+            if self.callback_command in query.data or total_1 == self.callback_command:
+                return await self.wait_for_press(query, update, bot, current_time)
+
+    async def wait_for_press(self, query, update, bot, current_time):
+        press = None
+        while press is None:
+            self.update = update
+            press = await self.handle_button_press(query, self.update, bot)
+            print(press)
+            await asyncio.sleep(1)
+        self.last_callback_time = current_time
+        self.previous_callback = query.data
+        self.update = update
+        return press

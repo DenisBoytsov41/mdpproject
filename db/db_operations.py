@@ -4,10 +4,13 @@ import json
 import re
 import sys
 from config import DB_DIR
+
+# Функция для подключения к базе данных SQLite
 def connect_to_db():
     db_path = os.path.join(DB_DIR, 'schedule.db')
     return sqlite3.connect(db_path)
 
+# Функция для создания таблицы users_tables в базе данных
 def create_users_tables_table():
     try:
         conn = connect_to_db()
@@ -33,6 +36,7 @@ def create_users_tables_table():
     finally:
         conn.close()
 
+# Функция для удаления таблицы users_tables из базы данных
 def drop_users_tables_table():
     try:
         conn = connect_to_db()
@@ -52,6 +56,7 @@ def drop_users_tables_table():
     finally:
         conn.close()
 
+# Функция для добавления записи о таблице пользователя в таблицу users_tables
 def add_user_table_entry(user_id, table_name):
     try:
         conn = connect_to_db()
@@ -81,6 +86,7 @@ def add_user_table_entry(user_id, table_name):
     finally:
         conn.close()
 
+# Функция для получения списка файлов .ics для указанного пользователя
 def get_user_ics_files(user_id):
     try:
         conn = connect_to_db()
@@ -100,6 +106,8 @@ def get_user_ics_files(user_id):
         return []
     finally:
         conn.close()
+
+# Функция для нормализации параметра
 def normalize_parameter(param):
     try:
         current_encoding = getattr(param, 'encoding', None)
@@ -113,6 +121,7 @@ def normalize_parameter(param):
         print(f"Произошла ошибка при нормализации параметра: {e}")
         return None
 
+# Функция для нормализации названия файла
 def normalize_table_name(file_name):
     try:
         words = re.findall(r'\w+', file_name)
@@ -124,8 +133,7 @@ def normalize_table_name(file_name):
         print(f"Произошла ошибка при нормализации названия файла: {e}")
         return None
 
-
-
+# Функция для добавления расписания в базу данных
 def add_schedule_to_db(schedule_data, table_name):
     try:
         conn = connect_to_db()
@@ -186,6 +194,7 @@ def add_schedule_to_db(schedule_data, table_name):
     finally:
         conn.close()
 
+# Функция для загрузки данных из JSON файла в базу данных
 def load_data_from_json(json_file_path):
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
@@ -198,6 +207,7 @@ def load_data_from_json(json_file_path):
     except Exception as e:
         print(f"Произошла ошибка при загрузке данных из JSON файла: {e}")
 
+# Функция для извлечения данных формата 1 из базы данных
 def extract_data_format1_from_db(table_name):
     try:
         conn = connect_to_db()
@@ -232,6 +242,7 @@ def extract_data_format1_from_db(table_name):
     finally:
         conn.close()
 
+# Функция для извлечения данных формата 2 из базы данных
 def extract_data_format2_from_db(table_name):
     try:
         conn = connect_to_db()

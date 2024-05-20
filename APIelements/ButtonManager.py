@@ -50,39 +50,17 @@ class ButtonPaginator:
     async def handle_pagination(self, query, chat_id, bot, page=1, page_size=10, total_page_buttons=8):
         total_pages = (len(self.buttons) + page_size - 1) // page_size
         if page < 1 or page > total_pages:
-            await bot.send_message(chat_id=chat_id, text="Недопустимый номер страницы")
+            await self.handle_invalid_page(chat_id, bot)
             return
-        start_page = max(1, min(page - total_page_buttons // 2, total_pages - total_page_buttons + 1))
-        end_page = min(start_page + total_page_buttons - 1, total_pages)
-        # Определяем диапазон кнопок страниц для отображения
-        start_index = (page - 1) * page_size
-        end_index = min(start_index + page_size, len(self.buttons))
-        buttons_page = self.buttons[start_index:end_index]
-        button_last = self.buttons[-1]
 
-        # Разбиваем кнопки на строки
-        rows = []
-        row = []
-        len_buttons_page = len(buttons_page)
-        for button in buttons_page:
-            row.append(button[0])
-            if (len(row) == 1 or (len_buttons_page<1 and len(row) < 1 and len_buttons_page == len(row)))\
-                    and button_last != button:
-                rows.append(row)
-                row = []
-                len_buttons_page -=1
+        start_page, end_page = self.calculate_page_range(page, total_pages, total_page_buttons)
+        buttons_page, button_last = self.get_buttons_for_page(page, page_size)
+        rows = self.split_buttons_into_rows(buttons_page, button_last)
 
-        # Добавляем навигационные кнопки
-        navigation_buttons = []
-        if page > 1:
-            navigation_buttons.append(InlineKeyboardButton("Назад", callback_data=f"prev_page_{page}"))
-        if page < total_pages:
-            navigation_buttons.append(InlineKeyboardButton("Вперед", callback_data=f"next_page_{page}"))
+        navigation_buttons = self.generate_navigation_buttons(page, total_pages)
         rows.append(navigation_buttons)
 
-        # Добавляем кнопки для перехода к определенной странице
-        page_buttons = [InlineKeyboardButton(str(i), callback_data=f"page_{i}") for i in
-                        range(start_page, end_page + 1) if i != page]
+        page_buttons = self.generate_page_navigation_buttons(start_page, end_page, page)
         rows.append(page_buttons)
         rows.append(button_last)
 
@@ -91,54 +69,125 @@ class ButtonPaginator:
         else:
             await self.send_buttons_page(chat_id, rows, bot, page, total_pages)
 
+    # Обрабатывает случай, когда номер страницы недопустим.
+    async def handle_invalid_page(self, chat_id, bot):
+        await bot.send_message(chat_id=chat_id, text="Недопустимый номер страницы")
+
+    # Вычисляет диапазон страниц для отображения
+    def calculate_page_range(self, page, total_pages, total_page_buttons):
+        start_page = max(1, min(page - total_page_buttons // 2, total_pages - total_page_buttons + 1))
+        end_page = min(start_page + total_page_buttons - 1, total_pages)
+        return start_page, end_page
+
+    # Получает кнопки для конкретной страницы
+    def get_buttons_for_page(self, page, page_size):
+        start_index = (page - 1) * page_size
+        end_index = min(start_index + page_size, len(self.buttons))
+        buttons_page = self.buttons[start_index:end_index]
+        button_last = self.buttons[-1]
+        return buttons_page, button_last
+
+    # Разбивает кнопки на строки для отображения в сообщении.
+    def split_buttons_into_rows(self, buttons_page, button_last):
+        rows = []
+        row = []
+        len_buttons_page = len(buttons_page)
+        for button in buttons_page:
+            row.append(button[0])
+            if (len(row) == 1 or (len_buttons_page < 1 and len(row) < 1 and len_buttons_page == len(row))) \
+                    and button_last != button:
+                rows.append(row)
+                row = []
+                len_buttons_page -= 1
+        return rows
+
+    # Генерирует кнопки навигации "Назад" и "Вперед"
+    def generate_navigation_buttons(self, page, total_pages):
+        navigation_buttons = []
+        if page > 1:
+            navigation_buttons.append(InlineKeyboardButton("Назад", callback_data=f"prev_page_{page}"))
+        if page < total_pages:
+            navigation_buttons.append(InlineKeyboardButton("Вперед", callback_data=f"next_page_{page}"))
+        return navigation_buttons
+
+    # Генерирует кнопки для перехода к определенной странице
+    def generate_page_navigation_buttons(self, start_page, end_page, current_page):
+        page_buttons = [InlineKeyboardButton(str(i), callback_data=f"page_{i}") for i in range(start_page, end_page + 1)
+                        if i != current_page]
+        return page_buttons
+
     async def start(self, chat_id, bot):
         query = None
         await self.handle_pagination(query, chat_id, bot)
 
+    #Главный метод, который обрабатывает нажатие кнопки. Определяет,
+    # является ли запрос действительным, извлекает номер страницы и направляет обработку на соответствующий метод.
     async def handle_button_press(self, query, update2, bot):
-        if query is None or query.data is None:
+        if not self.is_valid_query(query):
             return None
 
         data = query.data.split('_')
+        page = self.extract_page_number(data)
+
         if query.id == self.session_id:
             print("Я попал сюда")
             return None
 
-        if len(data) >= 3:
-            page = int(data[2]) if data[2].isdigit() else data[2]
-        elif len(data) == 1:
-            page = 0
+        if data[0] in ['prev', 'next', 'page'] and isinstance(page, int):
+            await self.handle_pagination_commands(data[0], query, bot, page)
+        elif len(update2.callback_query.data.split('_')) == 2 and update2.callback_query.data.split('_')[
+            1] == self.callback_command:
+            await bot.send_message(chat_id=query.message.chat.id, text="Возвращаемся к предыдущему запросу...")
+            return query.data
         else:
-            page = int(data[1]) if data[1].isdigit() else data[1]
+            return await self.handle_custom_command(data, query, bot)
 
-        if data[0] == 'prev' and isinstance(page, int) and page > 1:
+    # Обрабатывает команды пагинации (предыдущая, следующая страница и конкретная страница).
+    async def handle_pagination_commands(self, command, query, bot, page):
+        if command == 'prev' and page > 1:
             await self.handle_pagination(query, query.message.chat.id, bot, page - 1)
-        elif data[0] == 'next' and isinstance(page, int):
+        elif command == 'next':
             await self.handle_pagination(query, query.message.chat.id, bot, page + 1)
-        elif data[0] == 'page' and isinstance(page, int):
-            page_to_load = page
-            await self.handle_pagination(query, query.message.chat.id, bot, page_to_load)
-        elif len(update2.callback_query.data.split('_')) ==2:
-            if update2.callback_query.data.split('_')[1] == self.callback_command:
-                await bot.send_message(chat_id=query.message.chat.id, text="Возвращаемся к предыдущему запросу...")
-                return query.data
+        elif command == 'page':
+            await self.handle_pagination(query, query.message.chat.id, bot, page)
+
+    # Проверяет, является ли запрос действительным (не пустым и содержит данные).
+    def is_valid_query(self, query):
+        return query is not None and query.data is not None
+
+    # Извлекает номер страницы из данных запроса.
+    def extract_page_number(self, data):
+        if len(data) >= 3:
+            return int(data[2]) if data[2].isdigit() else data[2]
+        elif len(data) == 1:
+            return 0
         else:
-            # Проверяем, содержится ли часть callback_command в data[0]
-            if self.callback_command in data[0]:
-                button_number = int(data[0].replace(self.callback_command, ''))
-                if self.user_id not in self.pressed_buttons:
-                    self.pressed_buttons[self.user_id] = set()
-                if button_number in self.pressed_buttons[self.user_id]:
-                    await bot.send_message(chat_id=query.message.chat.id,
-                                           text=f"Кнопка {button_number} уже была нажата")
-                    return None
-                self.pressed_buttons[self.user_id].add(button_number)
-                await bot.send_message(chat_id=query.message.chat.id, text=f"Нажата кнопка {button_number}")
-                self.button_pressed = button_number
-                self.session_id = query.id
-                return button_number
-            else:
+            return int(data[1]) if data[1].isdigit() else data[1]
+
+    # Обрабатывает пользовательские команды, связанные с определенными кнопками.
+    async def handle_custom_command(self, data, query, bot):
+        if self.callback_command in data[0]:
+            button_number = int(data[0].replace(self.callback_command, ''))
+            if self.is_button_already_pressed(button_number):
+                await bot.send_message(chat_id=query.message.chat.id, text=f"Кнопка {button_number} уже была нажата")
                 return None
+            await self.register_button_press(button_number, query, bot)
+            return button_number
+        else:
+            return None
+
+    # Проверяет, была ли кнопка уже нажата пользователем.
+    def is_button_already_pressed(self, button_number):
+        if self.user_id not in self.pressed_buttons:
+            self.pressed_buttons[self.user_id] = set()
+        return button_number in self.pressed_buttons[self.user_id]
+
+    # Регистрирует нажатие кнопки и отправляет сообщение пользователю.
+    async def register_button_press(self, button_number, query, bot):
+        self.pressed_buttons[self.user_id].add(button_number)
+        await bot.send_message(chat_id=query.message.chat.id, text=f"Нажата кнопка {button_number}")
+        self.button_pressed = button_number
+        self.session_id = query.id
 
     async def handle_callback_query(self, query, update, bot):
         if query is None:

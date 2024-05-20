@@ -75,6 +75,10 @@ async def main(update, bot_context, user_id):
                                     ics_file_path = os.path.join(ical_dir, ics_files[0])
                                     await bot.send_document(chat_id=user_id, document=open(ics_file_path, 'rb'))
                                     # await get_ical_file(update, bot_context)
+                                    create_users_tables_table()
+                                    table_name = os.path.splitext(os.path.basename(ics_file_path))[0]
+                                    if table_name:
+                                        add_user_table_entry(update.effective_user.id, table_name)
                                     exit_flag = True
                                     break
                     if exit_flag:

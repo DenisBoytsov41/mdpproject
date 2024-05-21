@@ -2,7 +2,8 @@ import json  # Импорт модуля json для работы с JSON-дан
 import locale  # Импорт модуля locale для работы с локальными настройками.
 import sys  # Импорт модуля sys для работы с системными параметрами и функциями.
 import os.path  # Импорт модуля os.path для работы с путями к файлам.
-from calendar_utils import create_icalendar, create_event  # Импорт функций из модуля calendar_utils.
+from calendar_utils import create_icalendar  # Импорт функций из модуля calendar_utils.
+from allClasses.ICalendarCreator import CalendarCreator
 from db.db_operations import extract_data_format1_from_db, extract_data_format2_from_db  # Импорт функций из модуля db_operations.
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')  # Установка локали на русскую.
@@ -29,4 +30,8 @@ if __name__ == "__main__":  # Проверяем, что скрипт запущ
         print(f"Файл {output_json_file} не найден. Извлечение данных из БД.")  # Выводим сообщение.
         data = extract_data_from_db(output_json_file)  # Извлекаем данные из базы данных.
 
-    create_icalendar(data, output_json_file)  # Создаем iCalendar и сохраняем в файл.
+    #calendar_url  = "https://calendar.google.com/calendar/ical/ru.russian%23holiday%40group.v.calendar.google.com/public/basic.ics"
+    #manager = CalendarCreator()
+    #manager.create_icalendar(data, output_json_file)
+    #create_icalendar(data, output_json_file)  # Создаем iCalendar и сохраняем в файл.
+    create_icalendar(data, output_json_file)

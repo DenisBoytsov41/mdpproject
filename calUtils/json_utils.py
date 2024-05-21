@@ -1,6 +1,7 @@
 import json  # Импорт модуля json для работы с JSON-файлами.
 
 def read_json_file(file_path):
+    """Метод чтения JSON файла"""
     try:
         with open(file_path, 'r', encoding='utf-8') as json_file:  # Открытие JSON-файла для чтения в кодировке utf-8.
             data = json.load(json_file)  # Загрузка данных из JSON-файла в переменную data.

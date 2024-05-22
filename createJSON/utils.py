@@ -7,11 +7,26 @@ from config import THIRD_ELEMENTS_DIR  # Импорт директории из 
 from telegram import Update  # Импорт класса Update из модуля telegram
 from selenium import webdriver  # Импорт модуля для автоматизации браузера
 class NoVerifyHTTPAdapter(HTTPAdapter):  # Определение нового класса, наследующего HTTPAdapter
+    """
+        Класс NoVerifyHTTPAdapter, наследующий HTTPAdapter.
+        Отключает проверку SSL-сертификата при установке соединения.
+        """
     def init_poolmanager(self, connections, maxsize, block=False, **pool_kwargs):  # Определение метода для инициализации менеджера пулов
+        """
+                Метод для инициализации менеджера пулов соединений.
+                Параметры:
+                - connections: количество соединений;
+                - maxsize: максимальный размер пула;
+                - block: блокировать ли запросы;
+                - **pool_kwargs: дополнительные параметры для PoolManager.
+                """
         self.poolmanager = PoolManager(num_pools=connections, maxsize=maxsize, block=block,  # Создание экземпляра PoolManager с указанными параметрами
                                        ssl_version=ssl.PROTOCOL_TLS, **pool_kwargs)
 
 def replace_slash(input_string):  # Определение функции для замены символов
+    """
+       Функция для замены символов "\" на "/" и символов "_" на "." во входной строке.
+       """
     try:  # Обработка возможных ошибок
         return input_string.replace("\\/", "/").replace("_", ".")  # Замена символов "\" на "/", а также замена символов "_" на "."
     except Exception as e:  # Обработка исключений
@@ -19,9 +34,15 @@ def replace_slash(input_string):  # Определение функции для
         return input_string  # Возврат исходной строки в случае ошибки
 
 def to_unicode_escape(input_str):  # Определение функции для преобразования строки в формат Unicode escape
+    """
+        Функция для преобразования строки в формат Unicode escape.
+        """
     return input_str.encode('unicode_escape').decode('utf-8')  # Преобразование строки в формат Unicode escape и возврат результата
 
 def decode_special_chars(data):  # Определение функции для декодирования специальных символов
+    """
+        Функция для декодирования специальных символов в строках словаря.
+        """
     decoded_data_list = []  # Инициализация пустого списка для хранения декодированных данных
     try:  # Обработка возможных ошибок
         for entry in data:  # Перебор элементов входных данных
@@ -37,18 +58,27 @@ def decode_special_chars(data):  # Определение функции для 
     return decoded_data_list  # Возврат списка с декодированными данными
 
 def save_request_to_file(data_request, filename):  # Определение функции для сохранения запроса в файл
+    """
+        Функция для сохранения запроса в файл в формате JSON.
+        """
     filepath = os.path.join(THIRD_ELEMENTS_DIR, filename)  # Формирование пути к файлу
     with open(filepath, "w", encoding="utf-8") as file:  # Открытие файла для записи
         file.write(json.dumps(data_request, indent=4))  # Запись запроса в файл в формате JSON с отступами
     return filepath  # Возврат пути к сохраненному файлу
 
 def save_response_to_file(response, filename):  # Определение функции для сохранения ответа в файл
+    """
+        Функция для сохранения ответа в файл.
+        """
     filepath = os.path.join(THIRD_ELEMENTS_DIR, filename)  # Формирование пути к файлу
     with open(filepath, "w", encoding="utf-8") as file:  # Открытие файла для записи
         file.write(response.text)  # Запись текста ответа в файл
     return filepath  # Возврат пути к сохраненному файлу
 
 def shorten_filename(filename, max_length=200):  # Определение функции для сокращения имени файла
+    """
+       Функция для сокращения имени файла, если его длина превышает заданное значение.
+       """
     if len(filename) <= max_length:  # Проверка, не превышает ли длина имени максимально допустимое значение
         return filename  # Возврат исходного имени файла
     else:
@@ -61,12 +91,21 @@ def shorten_filename(filename, max_length=200):  # Определение фун
         return truncated_name + extension  # Возврат сокращенного имени с расширением
 
 async def send_telegram_message(update: Update, message: str):  # Определение асинхронной функции для отправки сообщения в Telegram
+    """
+        Асинхронная функция для отправки сообщения в Telegram.
+        """
     print(f"Отправка сообщения: {message}")  # Вывод сообщения об отправке сообщения
 
 async def get_telegram_input(update: Update, prompt: str):  # Определение асинхронной функции для получения ввода от пользователя в Telegram
+    """
+        Асинхронная функция для получения ввода от пользователя в Telegram.
+        """
     response = input("Введите свой ответ: ")  # Запрос ввода от пользователя в консоли
     return response  # Возврат введенного пользователем ответа
 
 def setup_driver():  # Определение функции для настройки драйвер
+    """
+        Функция для создания и настройки экземпляра веб-драйвера Chrome.
+        """
     driver = webdriver.Chrome()  # Создание экземпляра веб-драйвера Chrome
     return driver  # Возврат созданного драйвера

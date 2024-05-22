@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import aioauth_client
 import aiohttp
 import asyncio
@@ -11,97 +12,134 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from icalendar import Calendar
 from telegram import Bot, Update, InlineKeyboardButton, InlineKeyboardMarkup
+from config import *
 
 class GoogleCalendarManager:
     """
-    Менеджер для работы с Google Календарем.
+    РњРµРЅРµРґР¶РµСЂ РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ Google РљР°Р»РµРЅРґР°СЂРµРј.
     """
 
-    def __init__(self, credentials_file='credentials.json', redirect_uri='http://localhost:8080'):
+    def __init__(self, credentials_file='credentials.json', redirect_uri='https://v2462318.hosted-by-vdsina.ru/oauth/callback/'):
         """
-        Инициализация менеджера Google Календаря.
+        РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РјРµРЅРµРґР¶РµСЂР° Google РљР°Р»РµРЅРґР°СЂСЏ.
 
-        Аргументы:
-            credentials_file (str): Путь к файлу с учетными данными.
-            redirect_uri (str): URI перенаправления для аутентификации.
+        РђСЂРіСѓРјРµРЅС‚С‹:
+            credentials_file (str): РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ СЃ СѓС‡РµС‚РЅС‹РјРё РґР°РЅРЅС‹РјРё.
+            redirect_uri (str): URI РїРµСЂРµРЅР°РїСЂР°РІР»РµРЅРёСЏ РґР»СЏ Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё.
         """
         self.credentials_file = credentials_file
         self.redirect_uri = redirect_uri
+        self.authorization_response = None
 
-    async def authenticate_telegram(self, bot: Bot, update: Update):
+    async def send_telegram_message(self, bot, chat_id, messages):
         """
-        Аутентификация через Telegram и получение доступа к Google Календарю.
-
-        Аргументы:
-            bot (Bot): Экземпляр бота Telegram.
-            update (Update): Обновление Telegram.
-
-        Возвращает:
-            service: Сервис Google Календаря.
+        РћС‚РїСЂР°РІР»СЏРµС‚ СЃРѕРѕР±С‰РµРЅРёСЏ РІ Telegram С‡Р°С‚, СЂР°Р·РґРµР»СЏСЏ РёС… РЅР° С‡Р°СЃС‚Рё, РµСЃР»Рё РѕРЅРё СЃР»РёС€РєРѕРј РґР»РёРЅРЅС‹Рµ.
         """
-        # Загрузка данных учетной записи
+        max_message_length = 4096
+        message_text = "\n".join(messages)
+
+        if len(message_text) <= max_message_length:
+            await bot.send_message(chat_id, text=message_text)
+        else:
+            for i in range(0, len(message_text), max_message_length):
+                await bot.send_message(chat_id, text=message_text[i:i + max_message_length])
+
+    async def authenticate_google_calendar(self, bot: Bot, update: Update):
+        """
+        РђСѓС‚РµРЅС‚РёС„РёРєР°С†РёСЏ С‡РµСЂРµР· Telegram Рё РїРѕР»СѓС‡РµРЅРёРµ РґРѕСЃС‚СѓРїР° Рє Google РљР°Р»РµРЅРґР°СЂСЋ.
+
+        РђСЂРіСѓРјРµРЅС‚С‹:
+            bot (Bot): Р­РєР·РµРјРїР»СЏСЂ Р±РѕС‚Р° Telegram.
+            update (Update): РћР±РЅРѕРІР»РµРЅРёРµ Telegram.
+
+        Р’РѕР·РІСЂР°С‰Р°РµС‚:
+            service: РЎРµСЂРІРёСЃ Google РљР°Р»РµРЅРґР°СЂСЏ.
+        """
+        # Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… СѓС‡РµС‚РЅРѕР№ Р·Р°РїРёСЃРё
         with open(self.credentials_file, 'r') as f:
             cred_data = json.load(f)
             installed_data = cred_data['installed']
 
-        # Инициализация клиента Google OAuth2
+        # РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РєР»РёРµРЅС‚Р° Google OAuth2
         client = aioauth_client.GoogleClient(
             client_id=installed_data['client_id'],
             client_secret=installed_data['client_secret'],
-            redirect_uri=self.redirect_uri,
-            scope='https://www.googleapis.com/auth/calendar'
+            redirect_uri=REDIRECT_URI,
+            scope=SCOPES[0]
         )
         authorization_url = client.get_authorize_url()
 
         if not authorization_url.startswith('https://'):
-            raise ValueError("authorization_url должен начинаться с https://")
+            raise ValueError("authorization_url РґРѕР»Р¶РµРЅ РЅР°С‡РёРЅР°С‚СЊСЃСЏ СЃ https://")
 
-        # Отправка сообщения пользователю Telegram с запросом на авторизацию
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [InlineKeyboardButton(text='Авторизоваться', url=authorization_url)]
-        ])
-        user_id = update.message.chat_id if update.message else None
-        if not user_id and update.callback_query:
+        # РћС‚РїСЂР°РІРєР° СЃРѕРѕР±С‰РµРЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЋ Telegram СЃ Р·Р°РїСЂРѕСЃРѕРј РЅР° Р°РІС‚РѕСЂРёР·Р°С†РёСЋ
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[[InlineKeyboardButton(text='РђРІС‚РѕСЂРёР·РѕРІР°С‚СЊСЃСЏ', url=authorization_url)]])
+        user_id = None
+        if update.message is not None:
+            user_id = update.message.chat_id
+        if user_id is None and update.callback_query is not None:
             user_id = update.callback_query.message.chat.id
-        await bot.send_message(user_id, 'Пожалуйста, нажмите на кнопку ниже, чтобы авторизоваться:', reply_markup=keyboard)
+        await bot.send_message(user_id, 'РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РЅР°Р¶РјРёС‚Рµ РЅР° РєРЅРѕРїРєСѓ РЅРёР¶Рµ, С‡С‚РѕР±С‹ Р°РІС‚РѕСЂРёР·РѕРІР°С‚СЊСЃСЏ:',
+                               reply_markup=keyboard)
 
-        # Ожидание ответа пользователя с кодом авторизации
+        # РћР¶РёРґР°РЅРёРµ РѕС‚РІРµС‚Р° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ СЃ РєРѕРґРѕРј Р°РІС‚РѕСЂРёР·Р°С†РёРё
         authorization_code = None
         while not authorization_code:
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.redirect_uri) as response:
+                async with session.get(REDIRECT_URI) as response:
                     if response.status == 200:
                         authorization_code = await response.text()
                         break
             await asyncio.sleep(1)
 
-        # Получение токена доступа и создание сервиса Google Календаря
+        # РџРѕР»СѓС‡РµРЅРёРµ С‚РѕРєРµРЅР° РґРѕСЃС‚СѓРїР° Рё СЃРѕР·РґР°РЅРёРµ СЃРµСЂРІРёСЃР° Google РљР°Р»РµРЅРґР°СЂСЏ
         access_token, expires_in = await client.get_access_token(code=authorization_code)
         credentials = Credentials(access_token)
         service = build('calendar', 'v3', credentials=credentials)
         return service
 
-    async def add_events_from_ics(self, service, ics_file_path: str):
+    async def get_authorization_code(self):
         """
-        Добавление событий из файла формата .ics в Google Календарь.
+        РџРѕР»СѓС‡Р°РµС‚ РєРѕРґ Р°РІС‚РѕСЂРёР·Р°С†РёРё РѕС‚ OAuth СЃРµСЂРІРµСЂР°.
+        """
+        async with aiohttp.ClientSession() as session:
+            async with session.get(self.redirect_uri) as response:
+                if response.status == 200:
+                    return await response.text()
+                else:
+                    return None
 
-        Аргументы:
-            service: Сервис Google Календаря.
-            ics_file_path (str): Путь к файлу .ics.
+    def parse_authorization_code(self, callback_url):
+        """
+        РР·РІР»РµРєР°РµС‚ РєРѕРґ Р°РІС‚РѕСЂРёР·Р°С†РёРё РёР· callback URL.
+        """
+        parsed_url = urlparse(callback_url)
+        query_params = parse_qs(parsed_url.query)
+        authorization_code = query_params.get('code', [None])[0]
+        return authorization_code
 
-        Возвращает:
-            bool: Успешно ли добавлены события в календарь.
+    async def add_events_to_google_calendar(self, service, ics_file_path: str):
+        """
+        Р”РѕР±Р°РІР»РµРЅРёРµ СЃРѕР±С‹С‚РёР№ РёР· С„Р°Р№Р»Р° С„РѕСЂРјР°С‚Р° .ics РІ Google РљР°Р»РµРЅРґР°СЂСЊ.
+
+        РђСЂРіСѓРјРµРЅС‚С‹:
+            service: РЎРµСЂРІРёСЃ Google РљР°Р»РµРЅРґР°СЂСЏ.
+            ics_file_path (str): РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ .ics.
+
+        Р’РѕР·РІСЂР°С‰Р°РµС‚:
+            bool: РЈСЃРїРµС€РЅРѕ Р»Рё РґРѕР±Р°РІР»РµРЅС‹ СЃРѕР±С‹С‚РёСЏ РІ РєР°Р»РµРЅРґР°СЂСЊ.
         """
         if not os.path.exists(ics_file_path):
-            print("Указанный файл не существует.")
+            print("РЈРєР°Р·Р°РЅРЅС‹Р№ С„Р°Р№Р» РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.")
             return False
 
-        # Чтение событий из файла .ics и добавление их в календарь
+        # Р§С‚РµРЅРёРµ СЃРѕР±С‹С‚РёР№ РёР· С„Р°Р№Р»Р° .ics Рё РґРѕР±Р°РІР»РµРЅРёРµ РёС… РІ РєР°Р»РµРЅРґР°СЂСЊ
         with open(ics_file_path, 'rb') as f:
             calendar = Calendar.from_ical(f.read())
 
         new_calendar = {
-            'summary': 'Новый Календарь',
+            'summary': 'РќРѕРІС‹Р№ РљР°Р»РµРЅРґР°СЂСЊ',
             'timeZone': 'Europe/Moscow'
         }
         created_calendar = service.calendars().insert(body=new_calendar).execute()
@@ -130,19 +168,19 @@ class GoogleCalendarManager:
                     event_body['recurrence'] = self.parse_rrule_string(event_rrule)
                 service.events().insert(calendarId=calendar_id, body=event_body).execute()
 
-            print("События успешно добавлены в новый календарь Google.")
+            print("РЎРѕР±С‹С‚РёСЏ СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅС‹ РІ РЅРѕРІС‹Р№ РєР°Р»РµРЅРґР°СЂСЊ Google.")
 
         return True
 
     def parse_rrule_string(self, rrule_string: str):
         """
-        Разбор строки правила повторения событий (RRULE) из формата .ics.
+        Р Р°Р·Р±РѕСЂ СЃС‚СЂРѕРєРё РїСЂР°РІРёР»Р° РїРѕРІС‚РѕСЂРµРЅРёСЏ СЃРѕР±С‹С‚РёР№ (RRULE) РёР· С„РѕСЂРјР°С‚Р° .ics.
 
-        Аргументы:
-            rrule_string (str): Строка правила повторения.
+        РђСЂРіСѓРјРµРЅС‚С‹:
+            rrule_string (str): РЎС‚СЂРѕРєР° РїСЂР°РІРёР»Р° РїРѕРІС‚РѕСЂРµРЅРёСЏ.
 
-        Возвращает:
-            list: Список строк с правилами повторения событий.
+        Р’РѕР·РІСЂР°С‰Р°РµС‚:
+            list: РЎРїРёСЃРѕРє СЃС‚СЂРѕРє СЃ РїСЂР°РІРёР»Р°РјРё РїРѕРІС‚РѕСЂРµРЅРёСЏ СЃРѕР±С‹С‚РёР№.
         """
         freq_match = re.search(r"'FREQ': \['(.*?)'\]", rrule_string)
         until_match = re.search(r"'UNTIL': \[datetime.datetime\((.*?)\)\]", rrule_string)
@@ -159,3 +197,9 @@ class GoogleCalendarManager:
             recurrence.append(f'RRULE:FREQ={freq};UNTIL={until_str};INTERVAL={interval}')
 
         return recurrence
+
+    async def add_events_from_ics(self, service, ics_file_path):
+        """
+        Р”РѕР±Р°РІР»СЏРµС‚ СЃРѕР±С‹С‚РёСЏ РёР· iCal С„Р°Р№Р»Р° РІ Google РљР°Р»РµРЅРґР°СЂСЊ.
+        """
+        await self.add_events_to_google_calendar(service, ics_file_path)

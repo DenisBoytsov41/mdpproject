@@ -10,21 +10,37 @@ from config import *
 # Класс TelegramBot представляет бота Telegram, который управляет командами и взаимодействием с пользователями
 class TelegramBot:
     def __init__(self, token):
+        """
+            Инициализация объекта бота Telegram.
+
+            Args:
+                token (str): Токен бота.
+        """
         self.bot = Bot(token=token)
         self.commands = {}
         self.user_button_state = {}
 
     # Регистрирует новую команду для бота
     def register_command(self, command, description, handler):
-        """command: Название команды (строка).
-        description: Описание команды (строка).
-        handler: Функция-обработчик команды."""
+        """
+        Регистрирует новую команду для бота.
+
+        Args:
+            command (str): Название команды.
+            description (str): Описание команды.
+            handler (function): Функция-обработчик команды.
+        """
         self.commands[command] = (description, handler)
 
     # Отправляет сообщение пользователю
     async def send_telegram_message(self, update: Update, message: str):
-        """update: Объект обновления от Telegram.
-            message: Текст сообщения."""
+        """
+        Отправляет сообщение пользователю.
+
+        Args:
+            update (Update): Объект обновления от Telegram.
+            message (str): Текст сообщения.
+        """
         if update.message is not None:
             await self.bot.send_message(chat_id=update.message.chat_id, text=message)
         else:
@@ -32,13 +48,23 @@ class TelegramBot:
 
     # Отправляет сообщение в указанный чат.
     async def send_telegram_message_2(self, chat_id, message: str):
-        """chat_id: Идентификатор чата.
-        message: Текст сообщения."""
+        """
+           Отправляет сообщение в указанный чат.
+
+           Args:
+               chat_id (str): Идентификатор чата.
+               message (str): Текст сообщения.
+        """
         await self.bot.send_message(chat_id=chat_id, text=message)
 
     # Обрабатывает нажатие кнопки в сообщении
     async def handle_button_press(self, update: Update):
-        """update: Объект обновления от Telegram"""
+        """
+        Обрабатывает нажатие кнопки в сообщении.
+
+        Args:
+            update (Update): Объект обновления от Telegram.
+        """
         query = update.callback_query
         user_id = query.from_user.id
         button_id = query.data
@@ -65,8 +91,13 @@ class TelegramBot:
 
     # Запускает создание календаря, выполняя внешнюю команду
     async def handle_create_cal(self, update: Update, update_json_str: str):
-        """update: Объект обновления от Telegram.
-        update_json_str: JSON-строка с данными обновления."""
+        """
+        Запускает создание календаря, выполняя внешнюю команду.
+
+        Args:
+            update (Update): Объект обновления от Telegram.
+            update_json_str (str): JSON-строка с данными обновления.
+        """
         try:
             subprocess.run([PYTHON_EXE, START_CREATE_JSON_SCRIPT, update_json_str, TELEGRAM_API_TOKEN, str(update.effective_user.id)], check=True)
         except Exception as e:
@@ -76,7 +107,12 @@ class TelegramBot:
 
     # Обрабатывает запрос на скачивание файла
     async def handle_download_file(self, update: Update):
-        """update: Объект обновления от Telegram."""
+        """
+        Обрабатывает запрос на скачивание файла.
+
+        Args:
+            update (Update): Объект обновления от Telegram.
+        """
         query = update.callback_query
         user_id = query.from_user.id
         button_data = query.data
@@ -114,8 +150,13 @@ class TelegramBot:
 
     # Обрабатывает команды, отправленные пользователем.
     async def command_handler(self, update: Update, offset_dict: dict):
-        """update: Объект обновления от Telegram.
-        offset_dict: Словарь для отслеживания обработанных команд."""
+        """
+        Обрабатывает команды, отправленные пользователем.
+
+        Args:
+            update (Update): Объект обновления от Telegram.
+            offset_dict (dict): Словарь для отслеживания обработанных команд.
+        """
 
         current_time = time.time()
         print("Получено обновление:", update.message.text)
@@ -135,6 +176,7 @@ class TelegramBot:
 
     # Основной цикл бота, который получает и обрабатывает обновления от Telegram
     async def run(self):
+        """Основной цикл бота, который получает и обрабатывает обновления от Telegram"""
         await self.bot.initialize()
         offset_dict = {}
         max_update_id = 0

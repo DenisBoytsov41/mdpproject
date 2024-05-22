@@ -7,11 +7,21 @@ from config import DB_DIR
 
 # Функция для подключения к базе данных SQLite
 def connect_to_db():
+    """
+        Устанавливает соединение с базой данных SQLite.
+
+        Returns:
+            connection: Объект подключения к базе данных SQLite.
+        """
     db_path = os.path.join(DB_DIR, 'schedule.db')
     return sqlite3.connect(db_path)
 
 # Функция для создания таблицы users_tables в базе данных
 def create_users_tables_table():
+    """
+        Создает таблицу users_tables в базе данных.
+
+        """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -38,6 +48,10 @@ def create_users_tables_table():
 
 # Функция для удаления таблицы users_tables из базы данных
 def drop_users_tables_table():
+    """
+        Удаляет таблицу users_tables из базы данных, если она существует.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -58,6 +72,14 @@ def drop_users_tables_table():
 
 # Функция для добавления записи о таблице пользователя в таблицу users_tables
 def add_user_table_entry(user_id, table_name):
+    """
+        Добавляет запись о таблице пользователя в таблицу users_tables.
+
+        Args:
+            user_id (int): Идентификатор пользователя.
+            table_name (str): Название таблицы.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -88,6 +110,15 @@ def add_user_table_entry(user_id, table_name):
 
 # Функция для получения списка файлов .ics для указанного пользователя
 def get_user_ics_files(user_id):
+    """
+        Получает список файлов .ics для указанного пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя.
+
+        Returns:
+            list: Список файлов .ics.
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -109,6 +140,15 @@ def get_user_ics_files(user_id):
 
 # Функция для нормализации параметра
 def normalize_parameter(param):
+    """
+       Нормализует параметр.
+
+       Args:
+           param: Параметр для нормализации.
+
+       Returns:
+           str: Нормализованный параметр.
+    """
     try:
         current_encoding = getattr(param, 'encoding', None)
         if current_encoding is None or current_encoding.lower() != 'utf-8':
@@ -123,6 +163,15 @@ def normalize_parameter(param):
 
 # Функция для нормализации названия файла
 def normalize_table_name(file_name):
+    """
+       Нормализует название файла.
+
+       Args:
+           file_name (str): Название файла.
+
+       Returns:
+           str: Нормализованное название файла.
+    """
     try:
         words = re.findall(r'\w+', file_name)
         normalized_name = '_'.join(words)
@@ -135,6 +184,14 @@ def normalize_table_name(file_name):
 
 # Функция для добавления расписания в базу данных
 def add_schedule_to_db(schedule_data, table_name):
+    """
+        Добавляет расписание в базу данных.
+
+        Args:
+            schedule_data (list): Данные расписания.
+            table_name (str): Название таблицы.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()

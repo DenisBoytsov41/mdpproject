@@ -8,12 +8,26 @@ from allClasses.TelegramBot import TelegramBot
 
 # Отправляет пользователю список доступных команд
 async def start(update: Update, bot: TelegramBot):
+    """
+        Отправляет пользователю список доступных команд бота.
+
+        Args:
+            update (Update): Обновление из Telegram.
+            bot (TelegramBot): Экземпляр бота.
+        """
     command_list = [f"/{cmd} - {desc}" for cmd, (desc, _) in bot.commands.items()]
     await bot.bot.send_message(chat_id=update.message.chat_id, text="Доступные команды:\n" + "\n".join(command_list))
     await log_message(update)
 
 # Начинает процесс создания календаря и предлагает пользователю выбрать действие
 async def start_JSON(update: Update, bot: TelegramBot):
+    """
+        Начинает процесс создания календаря и предлагает пользователю выбрать действие.
+
+        Args:
+            update (Update): Обновление из Telegram.
+            bot (TelegramBot): Экземпляр бота.
+        """
     try:
         await log_message(update)
         update_json = update.to_dict()
@@ -27,6 +41,12 @@ async def start_JSON(update: Update, bot: TelegramBot):
 
 # Логирует сообщение пользователя в файл
 async def log_message(update: Update):
+    """
+        Логирует сообщение пользователя в файл.
+
+        Args:
+            update (Update): Обновление из Telegram.
+        """
     user_id = update.effective_user.id
     username = update.effective_user.first_name
     message = update.message.text
@@ -38,6 +58,13 @@ async def log_message(update: Update):
 
 # Отправляет пользователю список доступных файлов .ics.
 async def list_ics_files(update: Update, bot: TelegramBot):
+    """
+        Отправляет пользователю список доступных файлов .ics.
+
+        Args:
+            update (Update): Обновление из Telegram.
+            bot (TelegramBot): Экземпляр бота.
+        """
     user_id = update.effective_user.id
     try:
         ics_files = get_user_ics_files(user_id)
@@ -52,6 +79,13 @@ async def list_ics_files(update: Update, bot: TelegramBot):
 
 #Отправляет пользователю список доступных файлов .ics с кнопками для скачивания.
 async def list_ics_files_down(update: Update, bot: TelegramBot):
+    """
+        Отправляет пользователю список доступных файлов .ics с кнопками для скачивания.
+
+        Args:
+            update (Update): Обновление из Telegram.
+            bot (TelegramBot): Экземпляр бота.
+        """
     user_id = update.effective_user.id
     try:
         ics_files = get_user_ics_files(user_id)

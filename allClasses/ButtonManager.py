@@ -7,12 +7,17 @@ from datetime import datetime, timedelta
 
 # Класс ButtonPaginator представляет пагинатор кнопок для Telegram бота
 class ButtonPaginator:
-    """buttons: Список кнопок.
-    telegram_api_token: Токен API Telegram.
-    user_id: Идентификатор пользователя.
-    command: Команда для активации пагинатора.
-    callback_command: Команда для обработки нажатия кнопки."""
     def __init__(self, buttons, telegram_api_token, user_id, command=None, callback_command='button'):
+        """
+        Инициализирует объект пагинатора кнопок для Telegram бота.
+
+        Args:
+            buttons (list): Список кнопок.
+            telegram_api_token (str): Токен API Telegram.
+            user_id (str): Идентификатор пользователя.
+            command (str, optional): Команда для активации пагинатора. Defaults to None.
+            callback_command (str, optional): Команда для обработки нажатия кнопки. Defaults to 'button'.
+        """
         self.buttons = buttons
         self.telegram_api_token = telegram_api_token
         self.user_id = user_id
@@ -28,8 +33,13 @@ class ButtonPaginator:
 
     # Запускает пагинатор кнопок
     async def start_paginator(self, update, bot):
-        """update: Объект обновления от Telegram.
-        bot: Объект бота."""
+        """
+        Запускает пагинатор кнопок.
+
+        Args:
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+        """
         self.flag = True
         await self.start(update, bot)
 
@@ -51,7 +61,15 @@ class ButtonPaginator:
 
     # Разбивает кнопки на страницы
     def paginate_buttons(self, page_size=5):
-        """page_size: Количество кнопок на странице."""
+        """
+        Разбивает кнопки на страницы.
+
+        Args:
+            page_size (int, optional): Количество кнопок на странице. Defaults to 5.
+
+        Returns:
+            list: Список страниц кнопок.
+        """
         paginated_buttons = []
         for i in range(0, len(self.buttons), page_size):
             paginated_buttons.append(self.buttons[i:i + page_size])
@@ -59,11 +77,16 @@ class ButtonPaginator:
 
     # Отправляет страницу кнопок в чат
     async def send_buttons_page(self, chat_id, buttons_page, bot, page, total_pages):
-        """chat_id: Идентификатор чата.
-        buttons_page: Страница кнопок.
-        bot: Объект бота.
-        page: Номер текущей страницы.
-        total_pages: Общее количество страниц."""
+        """
+        Отправляет страницу кнопок в чат.
+
+        Args:
+            chat_id (str): Идентификатор чата.
+            buttons_page (list): Страница кнопок.
+            bot: Объект бота.
+            page (int): Номер текущей страницы.
+            total_pages (int): Общее количество страниц.
+        """
 
         text = f"Страница {page}/{total_pages}:"
         reply_markup = InlineKeyboardMarkup(buttons_page)
@@ -71,12 +94,17 @@ class ButtonPaginator:
 
     # Обрабатывает пагинацию кнопок
     async def handle_pagination(self, query, chat_id, bot, page=1, page_size=10, total_page_buttons=8):
-        """query: Объект запроса кнопки.
-        chat_id: Идентификатор чата.
-        bot: Объект бота.
-        page: Номер текущей страницы.
-        page_size: Количество кнопок на странице.
-        total_page_buttons: Общее количество кнопок на странице."""
+        """
+        Обрабатывает пагинацию кнопок.
+
+        Args:
+            query: Объект запроса кнопки.
+            chat_id (str): Идентификатор чата.
+            bot: Объект бота.
+            page (int, optional): Номер текущей страницы. Defaults to 1.
+            page_size (int, optional): Количество кнопок на странице. Defaults to 10.
+            total_page_buttons (int, optional): Общее количество кнопок на странице. Defaults to 8.
+        """
 
         total_pages = (len(self.buttons) + page_size - 1) // page_size
         if page < 1 or page > total_pages:
@@ -101,23 +129,44 @@ class ButtonPaginator:
 
     # Обрабатывает случай, когда номер страницы недопустим.
     async def handle_invalid_page(self, chat_id, bot):
-        """chat_id: Идентификатор чата.
-        bot: Объект бота."""
+        """
+        Обрабатывает случай, когда номер страницы недопустим.
+
+        Args:
+            chat_id (str): Идентификатор чата.
+            bot: Объект бота.
+        """
         await bot.send_message(chat_id=chat_id, text="Недопустимый номер страницы")
 
     # Вычисляет диапазон страниц для отображения
     def calculate_page_range(self, page, total_pages, total_page_buttons):
-        """page: Номер текущей страницы.
-        total_pages: Общее количество страниц.
-        total_page_buttons: Общее количество кнопок на странице."""
+        """
+        Вычисляет диапазон страниц для отображения.
+
+        Args:
+            page (int): Номер текущей страницы.
+            total_pages (int): Общее количество страниц.
+            total_page_buttons (int): Общее количество кнопок на странице.
+
+        Returns:
+            tuple: Номера первой и последней страницы в диапазоне.
+        """
         start_page = max(1, min(page - total_page_buttons // 2, total_pages - total_page_buttons + 1))
         end_page = min(start_page + total_page_buttons - 1, total_pages)
         return start_page, end_page
 
     # Получает кнопки для конкретной страницы
     def get_buttons_for_page(self, page, page_size):
-        """page: Номер текущей страницы.
-        page_size: Количество кнопок на странице."""
+        """
+        Получает кнопки для конкретной страницы.
+
+        Args:
+            page (int): Номер текущей страницы.
+            page_size (int): Количество кнопок на странице.
+
+        Returns:
+            tuple: Кортеж содержащий страницу кнопок и последнюю кнопку.
+        """
         start_index = (page - 1) * page_size
         end_index = min(start_index + page_size, len(self.buttons))
         buttons_page = self.buttons[start_index:end_index]
@@ -126,8 +175,16 @@ class ButtonPaginator:
 
     # Разбивает кнопки на строки для отображения в сообщении.
     def split_buttons_into_rows(self, buttons_page, button_last):
-        """buttons_page: Страница кнопок.
-        button_last: Последняя кнопка."""
+        """
+        Разбивает кнопки на строки для отображения в сообщении.
+
+        Args:
+            buttons_page (list): Страница кнопок.
+            button_last: Последняя кнопка.
+
+        Returns:
+            list: Список строк кнопок.
+        """
         rows = []
         row = []
         len_buttons_page = len(buttons_page)
@@ -142,8 +199,16 @@ class ButtonPaginator:
 
     # Генерирует кнопки навигации "Назад" и "Вперед"
     def generate_navigation_buttons(self, page, total_pages):
-        """page: Номер текущей страницы.
-        total_pages: Общее количество страниц."""
+        """
+        Генерирует кнопки навигации "Назад" и "Вперед".
+
+        Args:
+            page (int): Номер текущей страницы.
+            total_pages (int): Общее количество страниц.
+
+        Returns:
+            list: Список кнопок навигации.
+        """
         navigation_buttons = []
         if page > 1:
             navigation_buttons.append(InlineKeyboardButton("Назад", callback_data=f"prev_page_{page}"))
@@ -153,23 +218,43 @@ class ButtonPaginator:
 
     # Генерирует кнопки для перехода к определенной странице
     def generate_page_navigation_buttons(self, start_page, end_page, current_page):
-        """start_page: Номер первой страницы в диапазоне.
-        end_page: Номер последней страницы в диапазоне.
-        current_page: Номер текущей страницы."""
+        """
+        Генерирует кнопки для перехода к определенной странице.
+
+        Args:
+            start_page (int): Номер первой страницы в диапазоне.
+            end_page (int): Номер последней страницы в диапазоне.
+            current_page (int): Номер текущей страницы.
+
+        Returns:
+            list: Список кнопок для перехода к странице.
+        """
         page_buttons = [InlineKeyboardButton(str(i), callback_data=f"page_{i}") for i in range(start_page, end_page + 1)
                         if i != current_page]
         return page_buttons
 
     async def start(self, chat_id, bot):
+        """
+        Начинает процесс пагинации кнопок.
+
+        Args:
+            chat_id (str): Идентификатор чата.
+            bot: Объект бота.
+        """
         query = None
         await self.handle_pagination(query, chat_id, bot)
 
     # Главный метод, который обрабатывает нажатие кнопки. Определяет,
     # является ли запрос действительным, извлекает номер страницы и направляет обработку на соответствующий метод.
     async def handle_button_press(self, query, update2, bot):
-        """query: Объект запроса кнопки.
-        update2: Объект обновления от Telegram.
-        bot: Объект бота."""
+        """
+        Обрабатывает нажатие кнопки.
+
+        Args:
+            query: Объект запроса кнопки.
+            update2: Объект обновления от Telegram.
+            bot: Объект бота.
+        """
         if not self.is_valid_query(query):
             return None
 
@@ -191,10 +276,15 @@ class ButtonPaginator:
 
     # Обрабатывает команды пагинации (предыдущая, следующая страница и конкретная страница).
     async def handle_pagination_commands(self, command, query, bot, page):
-        """command: Тип команды (prev, next, page).
-        query: Объект запроса кнопки.
-        bot: Объект бота.
-        page: Номер текущей страницы."""
+        """
+        Обрабатывает команды пагинации (предыдущая, следующая страница и конкретная страница).
+
+        Args:
+            command (str): Тип команды (prev, next, page).
+            query: Объект запроса кнопки.
+            bot: Объект бота.
+            page (int): Номер текущей страницы.
+        """
         if command == 'prev' and page > 1:
             await self.handle_pagination(query, query.message.chat.id, bot, page - 1)
         elif command == 'next':
@@ -204,12 +294,28 @@ class ButtonPaginator:
 
     # Проверяет, является ли запрос действительным (не пустым и содержит данные).
     def is_valid_query(self, query):
-        """query: Объект запроса кнопки."""
+        """
+        Проверяет, является ли запрос действительным (не пустым и содержит данные).
+
+        Args:
+            query: Объект запроса кнопки.
+
+        Returns:
+            bool: Результат проверки.
+        """
         return query is not None and query.data is not None
 
     # Извлекает номер страницы из данных запроса.
     def extract_page_number(self, data):
-        """data: Данные запроса."""
+        """
+        Извлекает номер страницы из данных запроса.
+
+        Args:
+            data (list): Данные запроса.
+
+        Returns:
+            int or str: Номер страницы.
+        """
         if len(data) >= 3:
             return int(data[2]) if data[2].isdigit() else data[2]
         elif len(data) == 1:
@@ -219,9 +325,17 @@ class ButtonPaginator:
 
     # Обрабатывает пользовательские команды, связанные с определенными кнопками.
     async def handle_custom_command(self, data, query, bot):
-        """data: Данные запроса.
-        query: Объект запроса кнопки.
-        bot: Объект бота."""
+        """
+        Обрабатывает пользовательские команды, связанные с определенными кнопками.
+
+        Args:
+            data (list): Данные запроса.
+            query: Объект запроса кнопки.
+            bot: Объект бота.
+
+        Returns:
+            int or None: Номер кнопки или None.
+        """
         if self.callback_command in data[0]:
             button_number = int(data[0].replace(self.callback_command, ''))
             if self.is_button_already_pressed(button_number):
@@ -234,16 +348,29 @@ class ButtonPaginator:
 
     # Проверяет, была ли кнопка уже нажата пользователем.
     def is_button_already_pressed(self, button_number):
-        """button_number: Номер кнопки."""
+        """
+        Проверяет, была ли кнопка уже нажата пользователем.
+
+        Args:
+            button_number (int): Номер кнопки.
+
+        Returns:
+            bool: Результат проверки.
+        """
         if self.user_id not in self.pressed_buttons:
             self.pressed_buttons[self.user_id] = set()
         return button_number in self.pressed_buttons[self.user_id]
 
     # Регистрирует нажатие кнопки и отправляет сообщение пользователю.
     async def register_button_press(self, button_number, query, bot):
-        """button_number: Номер кнопки.
-        query: Объект запроса кнопки.
-        bot: Объект бота."""
+        """
+        Регистрирует нажатие кнопки и отправляет сообщение пользователю.
+
+        Args:
+            button_number (int): Номер кнопки.
+            query: Объект запроса кнопки.
+            bot: Объект бота.
+        """
         self.pressed_buttons[self.user_id].add(button_number)
         await bot.send_message(chat_id=query.message.chat.id, text=f"Нажата кнопка {button_number}")
         self.button_pressed = button_number
@@ -251,9 +378,17 @@ class ButtonPaginator:
 
     # Обрабатывает callback_query
     async def handle_callback_query(self, query, update, bot):
-        """query: Объект запроса кнопки.
-        update: Объект обновления от Telegram.
-        bot: Объект бота."""
+        """
+        Обрабатывает callback_query.
+
+        Args:
+            query: Объект запроса кнопки.
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+
+        Returns:
+            int or None: Номер кнопки или None.
+        """
         if query is None:
             return None
 
@@ -269,7 +404,12 @@ class ButtonPaginator:
 
     # Запускает пагинатор и обрабатывает обновления
     async def run(self, processed_updates=None):
-        """processed_updates: Обработанные обновления."""
+        """
+        Запускает пагинатор и обрабатывает обновления.
+
+        Args:
+            processed_updates: Обработанные обновления.
+        """
         bot = await self.initialize_bot()
         max_update_id = 0
 
@@ -300,16 +440,29 @@ class ButtonPaginator:
 
     # Получает обновления от Telegram
     async def fetch_updates(self, bot, max_update_id):
-        """bot: Объект бота.
-        max_update_id: Максимальный идентификатор обновления."""
+        """
+        Получает обновления от Telegram.
+
+        Args:
+            bot: Объект бота.
+            max_update_id (int): Максимальный идентификатор обновления.
+
+        Returns:
+            list: Список обновлений.
+        """
         updates = await bot.get_updates(offset=max_update_id + 1, timeout=60)
         return updates
 
     # Обрабатывает сообщения от пользователя
     async def handle_message(self, update, bot, processed_updates):
-        """update: Объект обновления от Telegram.
-        bot: Объект бота.
-        processed_updates: Обработанные обновления."""
+        """
+        Обрабатывает сообщения от пользователя.
+
+        Args:
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+            processed_updates: Обработанные обновления.
+        """
         if self.command is not None and update.message.text.startswith(self.command):
             if self.is_new_update(update.message.message_id, processed_updates):
                 await self.process_command(update, bot)
@@ -321,22 +474,43 @@ class ButtonPaginator:
 
     # Обрабатывает команду от пользователя
     async def process_command(self, update, bot):
-        """update: Объект обновления от Telegram.
-        bot: Объект бота."""
+        """
+        Обрабатывает команду от пользователя.
+
+        Args:
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+        """
         self.flag = False
         await self.start(update.effective_chat.id, bot)
 
     # Проверяет, является ли обновление новым
     def is_new_update(self, message_id, processed_updates):
-        """message_id: Идентификатор сообщения.
-        processed_updates: Обработанные обновления."""
+        """
+        Проверяет, является ли обновление новым.
+
+        Args:
+            message_id (int): Идентификатор сообщения.
+            processed_updates: Обработанные обновления.
+
+        Returns:
+            bool: Результат проверки.
+        """
         return processed_updates is None or message_id not in processed_updates
 
     # Обрабатывает callback_query от пользователя
     async def process_incoming_callback(self, update, bot, processed_updates):
-        """update: Объект обновления от Telegram.
-        bot: Объект бота.
-        processed_updates: Обработанные обновления."""
+        """
+        Обрабатывает callback_query от пользователя.
+
+        Args:
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+            processed_updates: Обработанные обновления.
+
+        Returns:
+            int or None: Номер кнопки или None.
+        """
         if self.is_new_update(update.callback_query.message.message_id, processed_updates):
             query = update.callback_query
             self.update = update
@@ -345,10 +519,15 @@ class ButtonPaginator:
 
     # Обрабатывает callback от кнопки
     async def process_callback(self, update, query, bot, current_time):
-        """update: Объект обновления от Telegram.
-        query: Объект запроса кнопки.
-        bot: Объект бота.
-        current_time: Текущее время."""
+        """
+        Обрабатывает callback от кнопки.
+
+        Args:
+            update: Объект обновления от Telegram.
+            query: Объект запроса кнопки.
+            bot: Объект бота.
+            current_time: Текущее время.
+        """
         if (current_time - self.last_callback_time).total_seconds() > 30:
             self.clear_state()
             return
@@ -373,10 +552,15 @@ class ButtonPaginator:
 
     # Ожидает нажатия кнопки
     async def wait_for_press(self, query, update, bot, current_time):
-        """query: Объект запроса кнопки.
-        update: Объект обновления от Telegram.
-        bot: Объект бота.
-        current_time: Текущее время."""
+        """
+        Ожидает нажатия кнопки.
+
+        Args:
+            query: Объект запроса кнопки.
+            update: Объект обновления от Telegram.
+            bot: Объект бота.
+            current_time: Текущее время.
+        """
         press = None
         while press is None:
             self.update = update

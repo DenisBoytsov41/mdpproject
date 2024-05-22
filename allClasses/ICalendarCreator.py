@@ -17,12 +17,12 @@ class CalendarCreator:
     # Создает iCalendar файл из данных.
     def create_icalendar(self, data, output_json_file=None):
         """
-                Создает iCalendar файл из данных.
+        Создает iCalendar файл из данных.
 
-                Аргументы:
-                    data (list): Список словарей с данными о событиях.
-                    output_json_file (str): Путь к файлу для сохранения iCalendar данных.
-                """
+        Аргументы:
+            data (list): Список словарей с данными о событиях.
+            output_json_file (str): Путь к файлу для сохранения iCalendar данных.
+        """
         cal = Calendar()
         cal.add('prodid', '-//KSU//RU')
         cal.add('version', '2.0')
@@ -49,11 +49,11 @@ class CalendarCreator:
     # Получает данные о праздниках
     def fetch_holidays(self):
         """
-                Получает данные о праздниках.
+        Получает данные о праздниках.
 
-                Возвращает:
-                    dict: Словарь с данными о праздниках.
-                """
+        Возвращает:
+            dict: Словарь с данными о праздниках.
+        """
         url = "https://calendar.google.com/calendar/ical/ru.russian%23holiday%40group.v.calendar.google.com/public/basic.ics"
         holidays_response = extract_holidays(url)
         return json.loads(holidays_response)
@@ -61,18 +61,18 @@ class CalendarCreator:
     # Собирает даты праздников в течение заданного периода времени.
     def collect_holiday_dates(self, start_date, end_date, type_weekStart, week_type, semester_holidays):
         """
-            Собирает даты праздников в течение заданного периода времени.
+        Собирает даты праздников в течение заданного периода времени.
 
-            Аргументы:
-                start_date (datetime): Начальная дата периода.
-                end_date (datetime): Конечная дата периода.
-                type_weekStart (str): Тип начала недели.
-                week_type (str): Тип недели.
-                semester_holidays (list): Список праздников в семестре.
+        Аргументы:
+            start_date (datetime): Начальная дата периода.
+            end_date (datetime): Конечная дата периода.
+            type_weekStart (str): Тип начала недели.
+            week_type (str): Тип недели.
+            semester_holidays (list): Список праздников в семестре.
 
-            Возвращает:
-                list: Список дат праздников в течение заданного периода времени.
-            """
+        Возвращает:
+            list: Список дат праздников в течение заданного периода времени.
+        """
         holiday_dates = []
         start_date_vrem = start_date
         end_date_vrem = start_date
@@ -89,35 +89,35 @@ class CalendarCreator:
     # Обрабатывает случай, когда нет праздников.
     def handle_empty_holidays(self, cal, entry, start_date, week_type, end_date):
         """
-                Обрабатывает случай, когда нет праздников.
+        Обрабатывает случай, когда нет праздников.
 
-                Аргументы:
-                    cal (Calendar): Календарь, куда добавляются события.
-                    entry (dict): Словарь с данными о событии.
-                    start_date (datetime): Начальная дата события.
-                    week_type (str): Тип недели.
-                    end_date (datetime): Конечная дата события.
-                """
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            start_date (datetime): Начальная дата события.
+            week_type (str): Тип недели.
+            end_date (datetime): Конечная дата события.
+        """
         creator = EventCreator()
         creator.create_event(cal, entry, start_date, start_date, week_type, end_date, entry.get("Семестр"))
 
     # Обрабатывает случай, когда есть только один праздник.
     def handle_single_holiday(self, cal, entry, start_date, end_date, week_type, type_weekStart, holiday_dates):
         """
-               Обрабатывает случай, когда есть только один праздник.
+           Обрабатывает случай, когда есть только один праздник.
 
-               Аргументы:
-                   cal (Calendar): Календарь, куда добавляются события.
-                   entry (dict): Словарь с данными о событии.
-                   start_date (datetime): Начальная дата события.
-                   end_date (datetime): Конечная дата события.
-                   week_type (str): Тип недели.
-                   type_weekStart (str): Тип начала недели.
-                   holiday_dates (list): Список праздников.
+           Аргументы:
+               cal (Calendar): Календарь, куда добавляются события.
+               entry (dict): Словарь с данными о событии.
+               start_date (datetime): Начальная дата события.
+               end_date (datetime): Конечная дата события.
+               week_type (str): Тип недели.
+               type_weekStart (str): Тип начала недели.
+               holiday_dates (list): Список праздников.
 
-               Возвращает:
-                   tuple: Кортеж с данными о дате праздника, корректированных датах и типе начала недели.
-               """
+           Возвращает:
+               tuple: Кортеж с данными о дате праздника, корректированных датах и типе начала недели.
+           """
         holiday_date = holiday_dates[0]
         creator = EventCreator()
         creator.create_event(cal, entry, start_date, start_date, week_type,
@@ -134,21 +134,21 @@ class CalendarCreator:
     def handle_multiple_holidays(self, cal, entry, start_date2, end_date2, week_type, holiday_dates, type_weekStart,
                                  end_date):
         """
-                Обрабатывает случай, когда есть несколько праздников.
+        Обрабатывает случай, когда есть несколько праздников.
 
-                Аргументы:
-                    cal (Calendar): Календарь, куда добавляются события.
-                    entry (dict): Словарь с данными о событии.
-                    start_date2 (datetime): Начальная дата события.
-                    end_date2 (datetime): Конечная дата события.
-                    week_type (str): Тип недели.
-                    holiday_dates (list): Список праздников.
-                    type_weekStart (str): Тип начала недели.
-                    end_date (datetime): Конечная дата события.
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            start_date2 (datetime): Начальная дата события.
+            end_date2 (datetime): Конечная дата события.
+            week_type (str): Тип недели.
+            holiday_dates (list): Список праздников.
+            type_weekStart (str): Тип начала недели.
+            end_date (datetime): Конечная дата события.
 
-                Возвращает:
-                    tuple: Кортеж с данными о корректированных датах, типе недели, праздниках и флаге использования break.
-                """
+        Возвращает:
+            tuple: Кортеж с данными о корректированных датах, типе недели, праздниках и флаге использования break.
+        """
         for i, holiday_date in enumerate(holiday_dates):
             if i == 0:
                 creator = EventCreator()
@@ -193,16 +193,16 @@ class CalendarCreator:
     # Обрабатывает даты событий
     def process_event_dates(self, cal, entry, start_date_str, end_date_str, week_type, semester_holidays):
         """
-                Обрабатывает даты событий.
+        Обрабатывает даты событий.
 
-                Аргументы:
-                    cal (Calendar): Календарь, куда добавляются события.
-                    entry (dict): Словарь с данными о событии.
-                    start_date_str (str): Строка с начальной датой события.
-                    end_date_str (str): Строка с конечной датой события.
-                    week_type (str): Тип недели.
-                    semester_holidays (list): Список праздников в семестре.
-                """
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            start_date_str (str): Строка с начальной датой события.
+            end_date_str (str): Строка с конечной датой события.
+            week_type (str): Тип недели.
+            semester_holidays (list): Список праздников в семестре.
+        """
         start_date = datetime.strptime(start_date_str, "%d.%m.%Y")
         end_date = datetime.strptime(end_date_str, "%d.%m.%Y")
         type_weekStart = get_current_week_type(start_date)
@@ -231,17 +231,17 @@ class CalendarCreator:
     # Собирает и корректирует даты праздников.
     def collect_and_adjust_holiday_dates(self, current_date, end_semester, semester_holidays, week_type):
         """
-               Собирает и корректирует даты праздников.
+           Собирает и корректирует даты праздников.
 
-               Аргументы:
-                   current_date (datetime): Текущая дата.
-                   end_semester (datetime): Конец семестра.
-                   semester_holidays (list): Список праздников в семестре.
-                   week_type (str): Тип недели.
+           Аргументы:
+               current_date (datetime): Текущая дата.
+               end_semester (datetime): Конец семестра.
+               semester_holidays (list): Список праздников в семестре.
+               week_type (str): Тип недели.
 
-               Возвращает:
-                   tuple: Кортеж с данными о датах праздников и корректированных датах.
-               """
+           Возвращает:
+               tuple: Кортеж с данными о датах праздников и корректированных датах.
+           """
         type_weekStart = get_current_week_type(current_date)
         start_date = current_date
         holiday_dates = []
@@ -278,20 +278,20 @@ class CalendarCreator:
     # Обрабатывает случай, когда есть только один праздник.
     def handle_sing_holiday(self, cal, entry, current_date, week_type, type_weekStart, end_semester, holiday_dates):
         """
-            Обрабатывает случай, когда есть только один праздник.
+        Обрабатывает случай, когда есть только один праздник.
 
-            Аргументы:
-                cal (Calendar): Календарь, куда добавляются события.
-                entry (dict): Словарь с данными о событии.
-                start_date (datetime): Начальная дата события.
-                end_date (datetime): Конечная дата события.
-                week_type (str): Тип недели.
-                type_weekStart (str): Тип начала недели.
-                holiday_dates (list): Список праздников.
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            start_date (datetime): Начальная дата события.
+            end_date (datetime): Конечная дата события.
+            week_type (str): Тип недели.
+            type_weekStart (str): Тип начала недели.
+            holiday_dates (list): Список праздников.
 
-            Возвращает:
-                tuple: Кортеж с данными о дате праздника, корректированных датах и типе начала недели.
-            """
+        Возвращает:
+            tuple: Кортеж с данными о дате праздника, корректированных датах и типе начала недели.
+        """
         holiday_date = holiday_dates[0]
         creator = EventCreator()
         creator.create_event(cal, entry, current_date, current_date, week_type,
@@ -308,22 +308,22 @@ class CalendarCreator:
     def handle_mult_holidays(self, cal, entry, start_date2, end_date2, week_type, holiday_dates, end_semester, used_break,
                              type_weekStart):
         """
-            Обрабатывает случай, когда есть несколько праздников.
+        Обрабатывает случай, когда есть несколько праздников.
 
-            Аргументы:
-                cal (Calendar): Календарь, куда добавляются события.
-                entry (dict): Словарь с данными о событии.
-                start_date2 (datetime): Начальная дата события.
-                end_date2 (datetime): Конечная дата события.
-                week_type (str): Тип недели.
-                holiday_dates (list): Список праздников.
-                type_weekStart (str): Тип начала недели.
-                end_date (datetime): Конечная дата семестра.
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            start_date2 (datetime): Начальная дата события.
+            end_date2 (datetime): Конечная дата события.
+            week_type (str): Тип недели.
+            holiday_dates (list): Список праздников.
+            type_weekStart (str): Тип начала недели.
+            end_date (datetime): Конечная дата семестра.
 
-            Возвращает:
-                tuple: Кортеж с обновленными данными о датах и типе недели, списком праздников,
-                    конечной датой семестра и флагом использования прерывания.
-            """
+        Возвращает:
+            tuple: Кортеж с обновленными данными о датах и типе недели, списком праздников,
+                конечной датой семестра и флагом использования прерывания.
+        """
         for i, holiday_date in enumerate(holiday_dates):
             if i == 0:
                 creator = EventCreator()
@@ -370,15 +370,15 @@ class CalendarCreator:
     # Обрабатывает еженедельное расписание.
     def process_weekly_schedule(self, cal, entry, semester_start, semester_holidays, week_type):
         """
-                Обрабатывает еженедельное расписание.
+        Обрабатывает еженедельное расписание.
 
-                Аргументы:
-                    cal (Calendar): Календарь, куда добавляются события.
-                    entry (dict): Словарь с данными о событии.
-                    semester_start (datetime): Начало семестра.
-                    semester_holidays (list): Список праздников в семестре.
-                    week_type (str): Тип недели.
-                """
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
+            semester_start (datetime): Начало семестра.
+            semester_holidays (list): Список праздников в семестре.
+            week_type (str): Тип недели.
+        """
         current_date = semester_start
         end_semester = get_current_semester_end()
         while current_date <= end_semester:
@@ -408,15 +408,15 @@ class CalendarCreator:
     # Создает событие на один день.
     def create_single_day_event(self, cal, entry):
         """
-                Создает событие на один день.
+        Создает событие на один день.
 
-                Аргументы:
-                    cal (Calendar): Календарь, куда добавляются события.
-                    entry (dict): Словарь с данными о событии.
+        Аргументы:
+            cal (Calendar): Календарь, куда добавляются события.
+            entry (dict): Словарь с данными о событии.
 
-                Возвращает:
-                    tuple: Кортеж с данными о строке начальной даты и объекте начальной даты.
-                """
+        Возвращает:
+            tuple: Кортеж с данными о строке начальной даты и объекте начальной даты.
+        """
         start_date_str = entry.get("Дата")
         start_date = datetime.strptime(start_date_str, "%Y.%m.%d")
         creator = EventCreator()

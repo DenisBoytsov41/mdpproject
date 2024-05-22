@@ -4,6 +4,15 @@ import json
 from datetime import datetime
 
 def extract_holidays(url):
+    """
+        Извлекает праздничные события из iCalendar-файла по указанному URL.
+
+        Args:
+            url (str): URL-адрес iCalendar-файла.
+
+        Returns:
+            str: Строка JSON, содержащая информацию о праздничных событиях.
+        """
     current_year = datetime.now().year
     response = requests.get(url)
     if response.status_code == 200:

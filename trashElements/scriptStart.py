@@ -9,5 +9,5 @@ def run_python_script(script_path):
 
 if __name__ == "__main__":
     os.chdir(BASE_DIR)
-    run_python_script('createJSON/startJSON.py')
-    run_python_script('calUtils/startCreateCAL.py')
+    run_python_script('../createJSON/startJSON.py')
+    run_python_script('../calUtils/startCreateCAL.py')

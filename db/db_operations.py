@@ -4,11 +4,24 @@ import json
 import re
 import sys
 from config import DB_DIR
+
+# Функция для подключения к базе данных SQLite
 def connect_to_db():
+    """
+        Устанавливает соединение с базой данных SQLite.
+
+        Returns:
+            connection: Объект подключения к базе данных SQLite.
+        """
     db_path = os.path.join(DB_DIR, 'schedule.db')
     return sqlite3.connect(db_path)
 
+# Функция для создания таблицы users_tables в базе данных
 def create_users_tables_table():
+    """
+        Создает таблицу users_tables в базе данных.
+
+        """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -33,7 +46,12 @@ def create_users_tables_table():
     finally:
         conn.close()
 
+# Функция для удаления таблицы users_tables из базы данных
 def drop_users_tables_table():
+    """
+        Удаляет таблицу users_tables из базы данных, если она существует.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -52,7 +70,16 @@ def drop_users_tables_table():
     finally:
         conn.close()
 
+# Функция для добавления записи о таблице пользователя в таблицу users_tables
 def add_user_table_entry(user_id, table_name):
+    """
+        Добавляет запись о таблице пользователя в таблицу users_tables.
+
+        Args:
+            user_id (int): Идентификатор пользователя.
+            table_name (str): Название таблицы.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -80,7 +107,48 @@ def add_user_table_entry(user_id, table_name):
         print(f"Произошла ошибка при добавлении записи в таблицу users_tables: {e}")
     finally:
         conn.close()
+
+# Функция для получения списка файлов .ics для указанного пользователя
+def get_user_ics_files(user_id):
+    """
+        Получает список файлов .ics для указанного пользователя.
+
+        Args:
+            user_id (int): Идентификатор пользователя.
+
+        Returns:
+            list: Список файлов .ics.
+    """
+    try:
+        conn = connect_to_db()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT table_names FROM users_tables WHERE user_id=?", (user_id,))
+        user_tables_entry = cursor.fetchone()
+
+        if user_tables_entry:
+            table_names = user_tables_entry[0]
+            ics_files = table_names.split(',')
+            return [f"{table_name}.ics" for table_name in ics_files]
+        else:
+            return []
+    except Exception as e:
+        print(f"Произошла ошибка при получении файлов .ics для пользователя {user_id}: {e}")
+        return []
+    finally:
+        conn.close()
+
+# Функция для нормализации параметра
 def normalize_parameter(param):
+    """
+       Нормализует параметр.
+
+       Args:
+           param: Параметр для нормализации.
+
+       Returns:
+           str: Нормализованный параметр.
+    """
     try:
         current_encoding = getattr(param, 'encoding', None)
         if current_encoding is None or current_encoding.lower() != 'utf-8':
@@ -93,7 +161,17 @@ def normalize_parameter(param):
         print(f"Произошла ошибка при нормализации параметра: {e}")
         return None
 
+# Функция для нормализации названия файла
 def normalize_table_name(file_name):
+    """
+       Нормализует название файла.
+
+       Args:
+           file_name (str): Название файла.
+
+       Returns:
+           str: Нормализованное название файла.
+    """
     try:
         words = re.findall(r'\w+', file_name)
         normalized_name = '_'.join(words)
@@ -104,9 +182,16 @@ def normalize_table_name(file_name):
         print(f"Произошла ошибка при нормализации названия файла: {e}")
         return None
 
-
-
+# Функция для добавления расписания в базу данных
 def add_schedule_to_db(schedule_data, table_name):
+    """
+        Добавляет расписание в базу данных.
+
+        Args:
+            schedule_data (list): Данные расписания.
+            table_name (str): Название таблицы.
+
+    """
     try:
         conn = connect_to_db()
         cursor = conn.cursor()
@@ -166,6 +251,7 @@ def add_schedule_to_db(schedule_data, table_name):
     finally:
         conn.close()
 
+# Функция для загрузки данных из JSON файла в базу данных
 def load_data_from_json(json_file_path):
     try:
         with open(json_file_path, 'r', encoding='utf-8') as file:
@@ -178,6 +264,7 @@ def load_data_from_json(json_file_path):
     except Exception as e:
         print(f"Произошла ошибка при загрузке данных из JSON файла: {e}")
 
+# Функция для извлечения данных формата 1 из базы данных
 def extract_data_format1_from_db(table_name):
     try:
         conn = connect_to_db()
@@ -205,13 +292,14 @@ def extract_data_format1_from_db(table_name):
             }
             data.append(entry)
 
-        return data
+            return data
     except sqlite3.Error as e:
         print(f"Произошла ошибка при извлечении данных из БД: {e}")
         return None
     finally:
         conn.close()
 
+# Функция для извлечения данных формата 2 из базы данных
 def extract_data_format2_from_db(table_name):
     try:
         conn = connect_to_db()

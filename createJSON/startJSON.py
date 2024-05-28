@@ -2,15 +2,15 @@ import asyncio
 import json
 import subprocess
 import sys
-from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
+import os
+from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton, Bot
 from allClasses.ScheduleBotHandler import ScheduleBotHandler
-from telegram import Bot
 from config import *
 from createJSON.utils import send_telegram_message, setup_driver
 from db.db_operations import create_users_tables_table, add_user_table_entry
 
-
 processed_messages = []
+
 async def main(update, bot_context, user_id):
     """Основной метод для работы с JSON календаря
     Args:
@@ -27,8 +27,29 @@ async def main(update, bot_context, user_id):
 
     driver = setup_driver()
     try:
-        driver, bot, schedule_json, output_json_file = await initialize_bot_and_driver(driver,bot_context)
-        subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file], check=True)
+        driver, bot, schedule_json, output_json_file = await initialize_bot_and_driver(driver, bot_context)
+
+        # Создание кнопок для выбора типа календаря
+        keyboard = InlineKeyboardMarkup([
+            [InlineKeyboardButton("Создать календарь с праздниками", callback_data="with_holidays")],
+            [InlineKeyboardButton("Создать календарь без праздников", callback_data="without_holidays")]
+        ])
+        await bot.send_message(chat_id=user_id, text="Выберите тип календаря:", reply_markup=keyboard)
+
+        # Обработка выбора пользователя
+        holiday_flag = await handle_user_choice(bot, user_id)
+
+        if holiday_flag is None:
+            await send_telegram_message(update, "Не удалось получить выбор пользователя. Попробуйте снова.")
+            return
+
+        # Уведомление пользователя о его выборе
+        choice_message = "Вы выбрали создание календаря с праздниками." if holiday_flag else "Вы выбрали создание календаря без праздников."
+        await bot.send_message(chat_id=user_id, text=choice_message)
+
+        # Запуск скрипта создания календаря с флагом праздников
+        subprocess.run([PYTHON_EXE, START_CREATE_CAL_SCRIPT, output_json_file, str(holiday_flag)], check=True)
+
         output_dir = os.path.dirname(output_json_file)
         ical_dir = os.path.join(output_dir, "ICAL")
 
@@ -41,18 +62,46 @@ async def main(update, bot_context, user_id):
                 [InlineKeyboardButton("Добавить расписание в ваш календарь", callback_data="add_calendar")],
                 [InlineKeyboardButton("Получить файл .ical", callback_data="get_ical_file")]
             ])
-            await process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,update_data)
+            await process_calendar_actions(bot, ical_dir, ics_files, user_id, keyboard, update_data)
         else:
             await send_telegram_message(update, "Нет файлов формата .ics в папке ICAL.")
-
     except Exception as e:
         error_message = f"Произошла ошибка при выполнении команды. {e}"
         await send_telegram_message(update, error_message)
-
     finally:
         driver.quit()
 
-async def initialize_bot_and_driver(driver,bot_context):
+async def handle_user_choice(bot, user_id):
+    """
+    Обрабатывает выбор пользователя для типа календаря.
+    Args:
+        bot (Bot): Объект бота.
+        user_id (str): ID пользователя.
+
+    Returns:
+        bool: Флаг для праздников (True или False), или None если не удалось получить ответ.
+    """
+    max_update_id = 0
+    iterations = 100
+    for _ in range(iterations):
+        try:
+            updates = await bot.get_updates(offset=max_update_id + 1, timeout=60)
+            for upd in updates:
+                if upd.update_id > max_update_id:
+                    max_update_id = upd.update_id
+                if upd.callback_query and str(upd.callback_query.message.chat.id) == str(user_id):
+                    query = upd.callback_query
+                    if query.data == "with_holidays":
+                        return True
+                    elif query.data == "without_holidays":
+                        return False
+            await asyncio.sleep(1)
+        except Exception as e:
+            print(f"Ошибка при обработке выбора пользователя: {e}")
+    # Если не было ответа от пользователя, возвращаем None
+    return None
+
+async def initialize_bot_and_driver(driver, bot_context):
     """
     Инициализирует бота и веб-драйвер, а также обрабатывает успешный или неудачный запрос на получение расписания.
     Args:
@@ -69,18 +118,17 @@ async def initialize_bot_and_driver(driver,bot_context):
         manager = ScheduleBotHandler()
         schedule_json, output_json_file = await manager.get_dom_element(bot, driver, update, user_id)
         if output_json_file is None:
-            await send_telegram_message(update,
-                                        "Произошла ошибка при выполнении команды. output_json_file не был создан.")
+            await send_telegram_message(update, "Произошла ошибка при выполнении команды. output_json_file не был создан.")
             return
     except Exception as e:
         manager = ScheduleBotHandler()
         schedule_json, output_json_file = await manager.back_schedule(bot, driver, update, user_id)
         if output_json_file is None:
-            await send_telegram_message(update,
-                                        "Произошла ошибка при выполнении команды. output_json_file не был создан.")
+            await send_telegram_message(update, "Произошла ошибка при выполнении команды. output_json_file не был создан.")
             return
     return driver, bot, schedule_json, output_json_file
-async def process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,update_data):
+
+async def process_calendar_actions(bot, ical_dir, ics_files, user_id, keyboard, update_data):
     """
     Обрабатывает действия пользователя с календарем.
     Args:
@@ -88,7 +136,7 @@ async def process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,upda
         ical_dir (str): Путь к папке с файлами .ics.
         ics_files (list): Список файлов .ics.
         user_id (str): ID пользователя.
-        keyboard (InlineKeyboardMarkup): Список кнопок
+        keyboard (InlineKeyboardMarkup): Список кнопок.
         update_data (dict): Данные обновления от Telegram.
 
     Returns:
@@ -96,12 +144,13 @@ async def process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,upda
     """
     max_update_id = 0
     await bot.send_message(chat_id=user_id, text="Выберите действие:", reply_markup=keyboard)
-    # processed_messages.append(update.message.message_id)
     while True:
         try:
             updates = await bot.get_updates(offset=max_update_id + 1, timeout=60)
             exit_flag = False
             for upd in updates:
+                if upd.update_id > max_update_id:
+                    max_update_id = upd.update_id
                 if upd.callback_query:
                     if upd.callback_query.message.message_id not in processed_messages:
                         processed_messages.append(upd.callback_query.message.chat.id)
@@ -109,8 +158,7 @@ async def process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,upda
                         if query.data == "add_calendar":
                             ics_file_path = os.path.join(ical_dir, ics_files[0])
                             update_data_str = json.dumps(update_data)
-                            subprocess.run([PYTHON_EXE, GOOGLE_CAL, ics_file_path, update_data_str, bot_context],
-                                           check=True)
+                            subprocess.run([PYTHON_EXE, GOOGLE_CAL, ics_file_path, update_data_str, bot_context], check=True)
                             create_users_tables_table()
                             table_name = os.path.splitext(os.path.basename(ics_file_path))[0]
                             if table_name:
@@ -120,7 +168,6 @@ async def process_calendar_actions(bot,ical_dir,ics_files,user_id, keyboard,upda
                         elif query.data == "get_ical_file":
                             ics_file_path = os.path.join(ical_dir, ics_files[0])
                             await bot.send_document(chat_id=user_id, document=open(ics_file_path, 'rb'))
-                            # await get_ical_file(update, bot_context)
                             create_users_tables_table()
                             table_name = os.path.splitext(os.path.basename(ics_file_path))[0]
                             if table_name:

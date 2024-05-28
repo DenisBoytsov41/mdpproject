@@ -4,7 +4,7 @@ import sys  # Импорт модуля sys для работы с систем�
 import os.path  # Импорт модуля os.path для работы с путями к файлам.
 from trashElements.calendar_utils import create_icalendar  # Импорт функций из модуля calendar_utils.
 from db.db_operations import extract_data_format1_from_db, extract_data_format2_from_db  # Импорт функций из модуля db_operations.
-from allClasses.ICalendarCreator import CalendarCreator # Экспортируем класс создания календаря
+from allClasses.ICalendarCreator import CalendarCreator # Импортируем класс создания календаря
 
 locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')  # Установка локали на русскую.
 
@@ -22,6 +22,11 @@ if __name__ == "__main__":  # Проверяем, что скрипт запущ
         sys.exit(1)  # Выходим из программы с кодом ошибки 1.
 
     output_json_file = sys.argv[1]  # Получаем имя выходного JSON-файла из аргументов командной строки.
+    use_holidays = True  # Устанавливаем флаг по умолчанию.
+
+    if len(sys.argv) > 2:  # Если количество аргументов больше 2, проверяем второй аргумент.
+        use_holidays = sys.argv[2].lower() == 'true'  # Устанавливаем флаг на основе аргумента.
+
     try:
         with open(output_json_file, 'r', encoding='utf-8') as file:  # Пытаемся открыть JSON-файл на чтение.
             schedule_json = file.read()  # Читаем содержимое файла.
@@ -30,5 +35,5 @@ if __name__ == "__main__":  # Проверяем, что скрипт запущ
         print(f"Файл {output_json_file} не найден. Извлечение данных из БД.")  # Выводим сообщение.
         data = extract_data_from_db(output_json_file)  # Извлекаем данные из базы данных.
 
-    manager = CalendarCreator() # Экземпляр класса CalendarCreator
-    manager.create_icalendar(data, output_json_file) # Создаем iCalendar и сохраняем в файл.
+    manager = CalendarCreator(use_holidays=use_holidays)  # Экземпляр класса CalendarCreator с флагом use_holidays.
+    manager.create_icalendar(data, output_json_file)  # Создаем iCalendar и сохраняем в файл.

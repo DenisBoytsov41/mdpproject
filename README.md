@@ -12,5 +12,5 @@ netstat -ano | findstr :8080
 
 taskkill /F /PID YOUR_PID
 
-sudo ln -s /etc/nginx/sites-available/ваш_конфиг /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/your_config/etc/nginx/sites-enabled/
 

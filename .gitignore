@@ -2,7 +2,6 @@
 *.json
 
 # Ignore TXT files
-*.txt
 
 # Ignore PHP files
 *.php

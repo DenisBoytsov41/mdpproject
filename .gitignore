@@ -10,7 +10,6 @@
 # Ignore ICS files
 *.ics
 
-*.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
